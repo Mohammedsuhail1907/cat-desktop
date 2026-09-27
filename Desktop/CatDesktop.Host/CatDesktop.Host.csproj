@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>CatDesktop.Host</RootNamespace>
+    <AssemblyName>CatDesktop</AssemblyName>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <Version>1.0.0</Version>
+    <Product>CatDesktop</Product>
+    <Company>CatDesktop</Company>
+    <Authors>CatDesktop</Authors>
+    <Description>CatDesktop – Angular desktop application with the Desktop Cat Companion.</Description>
+    <Copyright>Copyright © 2026</Copyright>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <NoWarn>$(NoWarn);WFO0003;MSB3277</NoWarn>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4191.47" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.20" />
+  </ItemGroup>
+
+  <!-- SQL migrations live at the solution level so they can be reviewed independently of the host. -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\Database\Migrations\*.sql" LogicalName="Migrations.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <!-- Native assets shipped next to the executable. -->
+  <ItemGroup>
+    <Content Include="Assets\app.ico" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!--
+    Production UI: the Angular build (cat-desktop/dist/cat-desktop/browser) is copied to wwwroot/ next to the exe.
+    Build the Angular app first (npm run build) – the build script does this automatically.
+  -->
+  <ItemGroup>
+    <AngularDist Include="..\..\cat-desktop\dist\cat-desktop\browser\**\*" />
+    <Content Include="@(AngularDist)" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

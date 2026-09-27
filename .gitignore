@@ -1,0 +1,34 @@
+# ---- .NET / Visual Studio ----
+bin/
+obj/
+.vs/
+*.user
+*.suo
+TestResults/
+tests/
+
+# ---- Angular ----
+node_modules/
+cat-desktop/node_modules/
+cat-desktop/dist/
+cat-desktop/.angular/
+
+# ---- Build outputs ----
+# The Angular build is copied here by the csproj during build/publish.
+Desktop/CatDesktop.Host/wwwroot/
+# Installer artefacts and downloaded tooling (build.ps1 recreates all of it).
+Installer/output/
+Installer/tools/
+Installer/redist/
+
+# ---- Logs / OS noise ----
+*.log
+npm-debug.log*
+Thumbs.db
+.DS_Store
+
+# ---- Visual test output (tests/visual/cat-preview renders PNGs here) ----
+tests/visual/cat-preview/out/
+
+# ---- Development data of `npm run dev` when an installed CatDesktop is running (scripts/dev-desktop.mjs) ----
+.dev-data/

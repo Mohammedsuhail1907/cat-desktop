@@ -1,0 +1,15 @@
+{
+  "extends": "../../../../cat-desktop/tsconfig.app.json",
+  "compilerOptions": {
+    "outDir": "../out/component-test-tsc",
+    "baseUrl": ".",
+    "paths": {
+      "@angular/*": ["../../../../cat-desktop/node_modules/@angular/*"],
+      "rxjs": ["../../../../cat-desktop/node_modules/rxjs"],
+      "rxjs/*": ["../../../../cat-desktop/node_modules/rxjs/*"],
+      "tslib": ["../../../../cat-desktop/node_modules/tslib"]
+    }
+  },
+  "files": ["main.ts"],
+  "include": []
+}

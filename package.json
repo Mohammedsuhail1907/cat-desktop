@@ -1,0 +1,28 @@
+{
+  "name": "catdesktop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CatDesktop – Angular 20 UI + .NET 9 WebView2 desktop host with the Cat Companion. Root scripts orchestrate the whole project.",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "postinstall": "node scripts/install-angular.mjs",
+    "install:all": "node scripts/install-angular.mjs --force",
+    "dev": "concurrently --names Angular,Desktop --prefix-colors red.bold,magenta.bold --kill-others --success first \"npm:dev:angular\" \"node scripts/dev-desktop.mjs --wait\"",
+    "dev:angular": "npm --prefix cat-desktop run start",
+    "dev:desktop": "node scripts/dev-desktop.mjs",
+    "start": "npm run build:angular && dotnet run --project Desktop/CatDesktop.Host/CatDesktop.Host.csproj -c Release --no-launch-profile",
+    "build": "npm run build:angular && npm run build:desktop",
+    "build:angular": "npm --prefix cat-desktop run build",
+    "build:desktop": "dotnet build Desktop/CatDesktop.Host/CatDesktop.Host.csproj -c Release -nologo",
+    "build:installer": "powershell -NoProfile -ExecutionPolicy Bypass -File build.ps1",
+    "test": "npm run test:angular",
+    "test:angular": "npm --prefix cat-desktop test -- --watch=false --browsers=ChromeHeadless",
+    "test:e2e": "node scripts/e2e.mjs",
+    "clean": "node scripts/clean.mjs"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
+}

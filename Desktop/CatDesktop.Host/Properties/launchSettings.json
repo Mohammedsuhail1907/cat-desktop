@@ -1,0 +1,17 @@
+{
+  "profiles": {
+    "CatDesktop (Angular dev server)": {
+      "commandName": "Project",
+      "commandLineArgs": "--dev-url http://127.0.0.1:4280",
+      "environmentVariables": {}
+    },
+    "CatDesktop (production build)": {
+      "commandName": "Project",
+      "commandLineArgs": ""
+    },
+    "CatDesktop (production build + devtools)": {
+      "commandName": "Project",
+      "commandLineArgs": "--devtools"
+    }
+  }
+}
