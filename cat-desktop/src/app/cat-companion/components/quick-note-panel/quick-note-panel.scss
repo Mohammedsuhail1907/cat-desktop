@@ -1,0 +1,117 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.note {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+}
+
+.field {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 8px 10px;
+  font-size: 13.5px;
+  outline: none;
+  transition: border-color var(--duration-fast), background var(--duration-fast);
+
+  &::placeholder {
+    color: var(--text-faint);
+  }
+
+  &:focus {
+    border-color: var(--accent);
+    background: var(--surface);
+  }
+}
+
+.body {
+  flex: 1;
+  min-height: 84px;
+  resize: none;
+  line-height: 1.45;
+}
+
+.error {
+  color: var(--danger);
+  font-size: 12px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hint {
+  flex: 1;
+  color: var(--text-faint);
+  font-size: 11.5px;
+}
+
+.btn {
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background var(--duration-fast), opacity var(--duration-fast);
+
+  &.primary {
+    background: var(--accent);
+    color: var(--accent-contrast);
+
+    &:hover:not(:disabled) {
+      background: var(--accent-2);
+    }
+  }
+
+  &.ghost {
+    background: transparent;
+    color: var(--text-muted);
+    border-color: var(--border);
+
+    &:hover {
+      background: var(--surface-2);
+    }
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: 44px;
+  transform: translateX(-50%);
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--success);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  box-shadow: var(--shadow-md);
+  animation: toast-in var(--duration-base) var(--ease-spring) both;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}

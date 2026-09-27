@@ -1,0 +1,65 @@
+<header class="head">
+  @if (tab() !== 'home') {
+    <button type="button" class="icon-btn" title="Back" aria-label="Back to quick actions" (click)="tabChange.emit('home')">
+      <app-icon name="chevron-left" [size]="16" />
+    </button>
+  } @else {
+    <span class="badge" aria-hidden="true"><app-icon name="cat" [size]="16" /></span>
+  }
+  <h2 class="title">{{ titles[tab()] }}</h2>
+  <button type="button" class="icon-btn" title="Hide cat" aria-label="Hide cat" (click)="hide.emit()">
+    <app-icon name="eye-off" [size]="16" />
+  </button>
+  <button type="button" class="icon-btn" title="Close" aria-label="Close" (click)="closed.emit()">
+    <app-icon name="close" [size]="16" />
+  </button>
+</header>
+
+@if (actions().length > 0) {
+  <nav class="strip" aria-label="Quick actions">
+    @for (item of actions(); track item.id) {
+      <button
+        type="button"
+        class="chip"
+        [class.is-current]="tabFor(item) === tab()"
+        [class.is-on]="item.actionType === 'pin' && pinned()"
+        [title]="item.name"
+        (click)="action.emit(item)"
+      >
+        <app-icon [name]="iconFor(item)" [size]="14" />
+        <span>{{ item.name }}</span>
+      </button>
+    }
+  </nav>
+}
+
+<div class="content">
+  @switch (tab()) {
+    @case ('quick-note') {
+      <app-quick-note-panel (cancelled)="tabChange.emit('home')" />
+    }
+    @case ('tasks') {
+      <app-tasks-panel />
+    }
+    @case ('focus') {
+      <app-focus-panel />
+    }
+    @case ('reminders') {
+      <app-reminders-panel />
+    }
+    @default {
+      @if (actions().length > 0) {
+        <div class="grid">
+          @for (item of actions(); track item.id) {
+            <button type="button" class="tile" [class.is-on]="item.actionType === 'pin' && pinned()" (click)="action.emit(item)">
+              <app-icon [name]="iconFor(item)" [size]="20" />
+              <span>{{ item.name }}</span>
+            </button>
+          }
+        </div>
+      } @else {
+        <p class="empty">No quick actions enabled. Add some under Settings › Cat menu quick actions.</p>
+      }
+    }
+  }
+</div>

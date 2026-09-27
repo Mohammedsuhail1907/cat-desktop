@@ -1,0 +1,143 @@
+/* The host element is the card (12 px radius); its shadow stays inside the 8 px window padding. */
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 1px 2px rgba(20, 16, 30, 0.12), 0 2px 6px rgba(20, 16, 30, 0.12);
+  overflow: hidden;
+  transform-origin: var(--cat-surface-origin, bottom center);
+  animation: panel-in var(--duration-base) var(--ease-out) both;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px 8px 12px;
+}
+
+.badge {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--accent-gradient);
+  color: var(--accent-contrast);
+  flex: none;
+}
+
+.title {
+  flex: 1;
+  font-size: 15px;
+}
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+
+  &:hover {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+}
+
+.strip {
+  display: flex;
+  gap: 6px;
+  padding: 0 12px 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.chip,
+.tile {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  transition: background var(--duration-fast), border-color var(--duration-fast);
+
+  &:hover {
+    background: var(--surface-3);
+  }
+
+  &.is-on {
+    color: var(--accent-2);
+    border-color: var(--accent-soft);
+  }
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  padding: 5px 10px 5px 8px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  white-space: nowrap;
+
+  &.is-current {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-contrast);
+  }
+}
+
+.content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 12px 12px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 68px;
+  padding: 8px 4px;
+  border-radius: 12px;
+  font-size: 11.5px;
+  line-height: 1.2;
+
+  span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.empty {
+  padding: 24px 8px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}

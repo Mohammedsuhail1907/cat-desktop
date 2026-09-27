@@ -1,0 +1,50 @@
+<div class="ring-wrap" [class.is-break]="isBreak()" [class.is-running]="status() === 'running'">
+  <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+    <circle class="track" cx="60" cy="60" [attr.r]="ringRadius" />
+    <circle
+      class="bar"
+      cx="60"
+      cy="60"
+      [attr.r]="ringRadius"
+      [attr.stroke-dasharray]="ringLength"
+      [attr.stroke-dashoffset]="dashOffset()"
+    />
+  </svg>
+  <div class="readout">
+    <span class="phase">{{ focus.phaseLabel() }}</span>
+    <span class="time">{{ focus.remainingLabel() }}</span>
+  </div>
+</div>
+
+<p class="status">{{ statusText() }}</p>
+
+<div class="dots" [attr.aria-label]="focus.state().completedFocusSessions + ' focus sessions completed'">
+  @for (filled of dots(); track $index) {
+    <span class="dot" [class.on]="filled"></span>
+  }
+</div>
+
+@if (error(); as message) {
+  <p class="error" role="alert">{{ message }}</p>
+}
+
+<div class="controls">
+  @switch (status()) {
+    @case ('running') {
+      <button type="button" class="btn primary" [disabled]="busy()" (click)="pause()">Pause</button>
+      <button type="button" class="btn" [disabled]="busy()" (click)="stop()">Stop</button>
+      <button type="button" class="btn" [disabled]="busy()" (click)="skip()">Skip</button>
+    }
+    @case ('paused') {
+      <button type="button" class="btn primary" [disabled]="busy()" (click)="resume()">Resume</button>
+      <button type="button" class="btn" [disabled]="busy()" (click)="stop()">Stop</button>
+      <button type="button" class="btn" [disabled]="busy()" (click)="skip()">Skip</button>
+    }
+    @default {
+      <button type="button" class="btn primary wide" [disabled]="busy()" (click)="start()">{{ startLabel() }}</button>
+      @if (status() === 'completed') {
+        <button type="button" class="btn" [disabled]="busy()" (click)="skip()">Skip</button>
+      }
+    }
+  }
+</div>

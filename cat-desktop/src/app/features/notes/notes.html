@@ -1,0 +1,159 @@
+<div class="notes">
+  <aside class="list-pane">
+    <div class="list-header">
+      <h1 class="list-title">Notes <span class="count">{{ notes.count() }}</span></h1>
+      <button type="button" class="btn btn-primary btn-sm" (click)="createNote()"><app-icon name="plus" [size]="16" /> New note</button>
+    </div>
+
+    <div class="search">
+      <app-icon name="search" [size]="16" class="search-icon" />
+      <label class="visually-hidden" for="notes-search">Search notes</label>
+      <input
+        id="notes-search"
+        class="input search-input"
+        type="search"
+        placeholder="Search notes"
+        autocomplete="off"
+        [value]="search()"
+        (input)="onSearch($any($event.target).value)"
+      />
+      @if (hasSearch()) {
+        <button type="button" class="btn btn-ghost btn-icon btn-sm search-clear" (click)="clearSearch()" aria-label="Clear search">
+          <app-icon name="close" [size]="14" />
+        </button>
+      }
+    </div>
+
+    @if (notes.error(); as message) {
+      <div class="alert pane-alert" role="alert">
+        <span>Notes could not be loaded: {{ message }}</span>
+        <button type="button" class="btn btn-ghost btn-sm" (click)="notes.refresh(search().trim())" [disabled]="notes.loading()">Retry</button>
+      </div>
+    }
+
+    @if (sortedNotes().length > 0) {
+      <ul class="note-list" aria-label="Notes">
+        @for (note of sortedNotes(); track note.id) {
+          <li>
+            <button
+              type="button"
+              class="note-item"
+              [class.is-selected]="note.id === selectedId()"
+              [attr.aria-current]="note.id === selectedId() ? 'true' : null"
+              (click)="select(note)"
+            >
+              <span class="dot" [class.is-empty]="!note.color" [style.background]="note.color"></span>
+              <span class="item-body">
+                <span class="item-top">
+                  <span class="item-title">{{ note.title || 'Untitled note' }}</span>
+                  @if (note.pinned) {
+                    <app-icon name="pin" [size]="13" class="item-pin" />
+                  }
+                </span>
+                <span class="item-snippet">{{ snippet(note) || 'No content yet' }}</span>
+                <span class="item-time">{{ note.updatedAt | relativeTime }}</span>
+              </span>
+            </button>
+          </li>
+        }
+      </ul>
+    } @else if (!notes.error()) {
+      @if (hasSearch()) {
+        <app-empty-state icon="search" title="No matches" [description]="'Nothing matches ' + search().trim() + '.'">
+          <button type="button" class="btn btn-sm" (click)="clearSearch()">Clear search</button>
+        </app-empty-state>
+      } @else if (!notes.loading()) {
+        <app-empty-state icon="note" title="No notes yet" description="Capture ideas, snippets and reminders. Notes save automatically.">
+          <button type="button" class="btn btn-primary btn-sm" (click)="createNote()">Write your first note</button>
+        </app-empty-state>
+      }
+    }
+  </aside>
+
+  <section class="editor-pane">
+    @if (error(); as message) {
+      <div class="alert pane-alert" role="alert">
+        <span>{{ message }}</span>
+        <button type="button" class="btn btn-ghost btn-sm" (click)="error.set(null)">Dismiss</button>
+      </div>
+    }
+    @if (selected(); as note) {
+      <div class="editor fade-up">
+        <div class="editor-toolbar">
+          <div class="color-chips" role="radiogroup" aria-label="Note colour">
+            @for (color of colors; track $index) {
+              <button
+                type="button"
+                class="color-chip"
+                role="radio"
+                [class.is-empty]="!color"
+                [class.is-active]="note.color === color"
+                [attr.aria-checked]="note.color === color"
+                [attr.aria-label]="color ? 'Colour ' + color : 'No colour'"
+                [style.background]="color"
+                (click)="setColor(color)"
+              ></button>
+            }
+          </div>
+
+          <span class="save-state" [class.is-error]="saveState() === 'error'" aria-live="polite">
+            @switch (saveState()) {
+              @case ('dirty') {
+                Unsaved changes
+              }
+              @case ('saving') {
+                Saving&hellip;
+              }
+              @case ('saved') {
+                Saved
+              }
+              @case ('error') {
+                Save failed
+              }
+              @default {
+                Edited {{ note.updatedAt | relativeTime }}
+              }
+            }
+          </span>
+
+          <div class="toolbar-actions">
+            <button type="button" class="btn btn-ghost btn-icon" [class.is-pinned]="note.pinned" (click)="togglePin()" [attr.aria-pressed]="note.pinned" [title]="note.pinned ? 'Unpin' : 'Pin to dashboard'">
+              <app-icon name="pin" [size]="18" />
+            </button>
+            <button type="button" class="btn btn-ghost btn-icon" (click)="deleteSelected()" title="Delete note" aria-label="Delete note">
+              <app-icon name="trash" [size]="18" />
+            </button>
+          </div>
+        </div>
+
+        <label class="visually-hidden" for="note-title">Title</label>
+        <input
+          #titleInput
+          id="note-title"
+          class="title-input"
+          type="text"
+          placeholder="Untitled note"
+          autocomplete="off"
+          [value]="draftTitle()"
+          (input)="onTitleInput($any($event.target).value)"
+        />
+        <label class="visually-hidden" for="note-content">Content</label>
+        <textarea
+          id="note-content"
+          class="content-input"
+          placeholder="Start writing&hellip;"
+          [value]="draftContent()"
+          (input)="onContentInput($any($event.target).value)"
+        ></textarea>
+      </div>
+    } @else {
+      <div class="editor-empty">
+        <app-empty-state icon="edit" title="Select a note" description="Pick a note from the list or create a new one to start writing.">
+          <button type="button" class="btn btn-primary" (click)="createNote()"><app-icon name="plus" [size]="18" /> New note</button>
+        </app-empty-state>
+      </div>
+    }
+  </section>
+</div>
+
+<app-confirm-dialog />

@@ -1,0 +1,307 @@
+<div class="page settings-page fade-up">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Settings</h1>
+      <p class="page-subtitle">Everything is stored locally on this PC.</p>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="section-nav" aria-label="Settings sections">
+      @for (section of sections; track section.id) {
+        <button type="button" class="nav-item" [class.is-active]="activeSection() === section.id" (click)="scrollTo(section.id)" [attr.aria-current]="activeSection() === section.id ? 'true' : null">
+          <app-icon [name]="section.icon" [size]="17" />
+          {{ section.label }}
+        </button>
+      }
+    </nav>
+
+    <div class="sections">
+      <!-- Appearance -->
+      <section class="card section" id="appearance" data-section="appearance">
+        <h2 class="section-title"><app-icon name="palette" [size]="18" /> Appearance</h2>
+        <div class="row">
+          <div class="row-text">
+            <span class="row-label">Theme</span>
+            <span class="row-hint">System follows your Windows colour mode.</span>
+          </div>
+          <div class="segmented" role="group" aria-label="Theme">
+            @for (theme of themes; track theme.value) {
+              <button type="button" [attr.aria-pressed]="settings.theme() === theme.value" (click)="setTheme(theme.value)">
+                <app-icon [name]="theme.value === 'system' ? 'monitor' : theme.value === 'light' ? 'sun' : 'moon'" [size]="15" />
+                {{ theme.label }}
+              </button>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- Behaviour -->
+      <section class="card section" id="behaviour" data-section="behaviour">
+        <h2 class="section-title"><app-icon name="window" [size]="18" /> Behaviour</h2>
+        @if (!bridge.isHosted) {
+          <p class="note"><app-icon name="info" [size]="15" /> These options only apply inside the CatDesktop desktop app.</p>
+        }
+        <div class="row">
+          <div class="row-text">
+            <span class="row-label">Close to tray</span>
+            <span class="row-hint">Closing the window keeps CatDesktop running in the notification area.</span>
+          </div>
+          <app-toggle ariaLabel="Close to tray" [checked]="settings.closeToTray()" [disabled]="!bridge.isHosted || busy()" (checkedChange)="setCloseToTray($event)" />
+        </div>
+        <div class="row">
+          <div class="row-text">
+            <span class="row-label">Start with Windows</span>
+            <span class="row-hint">Launch CatDesktop when you sign in.</span>
+          </div>
+          <app-toggle ariaLabel="Start with Windows" [checked]="settings.startWithWindows()" [disabled]="!bridge.isHosted || busy()" (checkedChange)="setStartWithWindows($event)" />
+        </div>
+      </section>
+
+      <!-- Cat Companion (#cat, #cat-size, #cat-theme) -->
+      <section class="card section" id="cat" data-section="cat">
+        <app-cat-companion-card (notice)="showToast($event.text, $event.error)" />
+      </section>
+
+      <!-- Quick actions -->
+      <section class="card section" id="actions" data-section="actions">
+        <div class="section-head">
+          <h2 class="section-title"><app-icon name="sparkles" [size]="18" /> Cat menu quick actions</h2>
+          @if (actionsDirty()) {
+            <span class="chip chip-warning">Unsaved</span>
+          }
+        </div>
+        <p class="row-hint">The actions in the companion panel (double-click the cat). They are shown top to bottom.</p>
+
+        <div class="table-wrap">
+          <table class="actions-table">
+            <thead>
+              <tr>
+                <th scope="col">On</th>
+                <th scope="col">Name</th>
+                <th scope="col">Icon</th>
+                <th scope="col">Type</th>
+                <th scope="col">Route</th>
+                <th scope="col"><span class="visually-hidden">Order and delete</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (action of actionsDraft(); track $index; let i = $index, first = $first, last = $last) {
+                <tr [class.is-disabled]="!action.enabled">
+                  <td><app-toggle [ariaLabel]="'Enable action ' + (i + 1)" [checked]="action.enabled" (checkedChange)="patchAction(i, { enabled: $event })" /></td>
+                  <td>
+                    <input class="input input-sm" type="text" [value]="action.name" [class.is-invalid]="!isValidName(action.name)" (input)="patchAction(i, { name: $any($event.target).value })" [attr.aria-label]="'Name of action ' + (i + 1)" />
+                    @if (action.actionType === 'custom') {
+                      <input class="input input-sm id-input" type="text" [value]="action.id" [class.is-invalid]="!isValidId(action.id)" (input)="patchAction(i, { id: $any($event.target).value })" [attr.aria-label]="'Id of action ' + (i + 1)" placeholder="id" />
+                    } @else {
+                      <span class="id-label">{{ action.id }}</span>
+                    }
+                  </td>
+                  <td>
+                    <span class="icon-cell">
+                      <app-icon [name]="action.icon" [size]="18" />
+                      <select class="select input-sm" (change)="patchAction(i, { icon: $any($event.target).value })" [attr.aria-label]="'Icon of action ' + (i + 1)">
+                        @for (icon of iconNames; track icon) {
+                          <option [value]="icon" [selected]="icon === action.icon">{{ icon }}</option>
+                        }
+                      </select>
+                    </span>
+                  </td>
+                  <td>
+                    <select class="select input-sm" (change)="setActionType(i, $any($event.target).value)" [attr.aria-label]="'Type of action ' + (i + 1)">
+                      @for (type of actionTypes; track type.value) {
+                        <option [value]="type.value" [selected]="type.value === action.actionType">{{ type.label }}</option>
+                      }
+                    </select>
+                  </td>
+                  <td>
+                    @if (isRouteType(action.actionType)) {
+                      <input class="input input-sm" type="text" placeholder="/dashboard" [value]="action.route ?? ''" [class.is-invalid]="!isValidRoute(action.route)" (input)="patchAction(i, { route: $any($event.target).value })" [attr.aria-label]="'Route of action ' + (i + 1)" />
+                    } @else {
+                      <span class="muted">&ndash;</span>
+                    }
+                  </td>
+                  <td class="row-tools">
+                    <button type="button" class="btn btn-ghost btn-icon btn-sm" (click)="moveAction(i, -1)" [disabled]="first" aria-label="Move up"><app-icon name="arrow-up" [size]="15" /></button>
+                    <button type="button" class="btn btn-ghost btn-icon btn-sm" (click)="moveAction(i, 1)" [disabled]="last" aria-label="Move down"><app-icon name="arrow-down" [size]="15" /></button>
+                    <button type="button" class="btn btn-ghost btn-icon btn-sm danger" (click)="removeAction(i)" aria-label="Delete action"><app-icon name="trash" [size]="15" /></button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="empty-cell">No quick actions. Add one below or reset to the defaults.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @for (message of actionErrors(); track message) {
+          <p class="field-error">{{ message }}</p>
+        }
+
+        <div class="section-actions">
+          <button type="button" class="btn" (click)="addAction()" [disabled]="actionsDraft().length >= maxActions"><app-icon name="plus" [size]="16" /> Add custom action</button>
+          <button type="button" class="btn btn-ghost" (click)="resetActions()" [disabled]="busy()"><app-icon name="refresh" [size]="16" /> Reset to defaults</button>
+          <span class="spacer"></span>
+          <button type="button" class="btn btn-ghost" (click)="revertActions()" [disabled]="!actionsDirty()">Revert</button>
+          <button type="button" class="btn btn-primary" (click)="saveActions()" [disabled]="!actionsDirty() || !actionsValid() || busy()"><app-icon name="save" [size]="16" /> Save</button>
+        </div>
+      </section>
+
+      <!-- Keyboard shortcuts -->
+      <section class="card section" id="hotkeys" data-section="hotkeys">
+        <div class="section-head">
+          <h2 class="section-title"><app-icon name="keyboard" [size]="18" /> Keyboard shortcuts</h2>
+          @if (hotkeysDirty()) {
+            <span class="chip chip-warning">Unsaved</span>
+          }
+        </div>
+        <p class="row-hint">Global shortcuts work even when CatDesktop is in the background. Include Ctrl, Alt, Shift or Win (F1&ndash;F24 also work alone). They are paused while you record.</p>
+
+        <div class="hotkey-list">
+          @for (row of hotkeyRows; track row.name) {
+            <div class="row hotkey-row" [class.is-recording]="recording() === row.name">
+              <div class="row-text">
+                <span class="row-label">{{ row.label }}</span>
+                <span class="row-hint">{{ row.description }}</span>
+              </div>
+              <div class="hotkey-controls">
+                @if (recording() === row.name) {
+                  <span class="kbd recording">Press keys&hellip; (Esc to cancel)</span>
+                } @else if (hotkeysDraft()[row.name]; as gesture) {
+                  <kbd class="kbd">{{ gesture }}</kbd>
+                } @else {
+                  <span class="muted">Not set</span>
+                }
+                <button type="button" class="btn btn-sm" [class.btn-soft]="recording() === row.name" (click)="startRecording(row.name)">
+                  {{ recording() === row.name ? 'Cancel' : 'Record' }}
+                </button>
+                <button type="button" class="btn btn-ghost btn-icon btn-sm" (click)="clearHotkey(row.name)" [disabled]="!hotkeysDraft()[row.name]" aria-label="Clear shortcut"><app-icon name="close" [size]="15" /></button>
+              </div>
+            </div>
+          }
+        </div>
+
+        @if (hotkeys.error(); as message) {
+          <p class="field-error" role="alert"><app-icon name="warning" [size]="14" /> {{ message }}</p>
+        }
+
+        <div class="section-actions">
+          <span class="spacer"></span>
+          <button type="button" class="btn btn-ghost" (click)="revertHotkeys()" [disabled]="!hotkeysDirty()">Revert</button>
+          <button type="button" class="btn btn-primary" (click)="saveHotkeys()" [disabled]="!hotkeysDirty() || busy()"><app-icon name="save" [size]="16" /> Save</button>
+        </div>
+      </section>
+
+      <!-- Data -->
+      <section class="card section" id="data" data-section="data">
+        <div class="section-head">
+          <h2 class="section-title"><app-icon name="database" [size]="18" /> Data</h2>
+          <button type="button" class="btn btn-ghost btn-sm" (click)="refreshData()" aria-label="Refresh database info"><app-icon name="refresh" [size]="15" /> Refresh</button>
+        </div>
+
+        @if (dataError(); as message) {
+          <p class="field-error" role="alert">{{ message }}</p>
+        }
+
+        @if (data.info(); as info) {
+          <dl class="info-grid">
+            <div class="info-item info-wide">
+              <dt>Database</dt>
+              <dd class="mono selectable">{{ info.databasePath }}</dd>
+            </div>
+            <div class="info-item">
+              <dt>Size</dt>
+              <dd>{{ formatBytes(info.sizeBytes) }}</dd>
+            </div>
+            <div class="info-item">
+              <dt>Notes</dt>
+              <dd>{{ info.noteCount }}</dd>
+            </div>
+            <div class="info-item">
+              <dt>Tasks</dt>
+              <dd>{{ info.taskCount }}</dd>
+            </div>
+            <div class="info-item">
+              <dt>Schema version</dt>
+              <dd>{{ info.schemaVersion }}</dd>
+            </div>
+          </dl>
+        } @else if (!dataError()) {
+          <p class="muted">Loading database information&hellip;</p>
+        }
+
+        <div class="section-actions">
+          <button type="button" class="btn" (click)="exportData()" [disabled]="data.busy() || busy()"><app-icon name="download" [size]="16" /> Export&hellip;</button>
+          <button type="button" class="btn" (click)="importData()" [disabled]="data.busy() || busy()"><app-icon name="upload" [size]="16" /> Import&hellip;</button>
+          <button type="button" class="btn btn-ghost" (click)="openDataFolder()" [disabled]="busy()"><app-icon name="folder" [size]="16" /> Open data folder</button>
+        </div>
+        <p class="row-hint">Export writes a JSON backup of notes, tasks, settings and quick actions. Import merges a backup by id.</p>
+      </section>
+
+      <!-- About -->
+      <section class="card section" id="about" data-section="about">
+        <h2 class="section-title"><app-icon name="info" [size]="18" /> About</h2>
+        <div class="about">
+          <img class="about-logo" src="icon-256.png" alt="" width="64" height="64" />
+          <div class="about-text">
+            <div class="about-name">
+              CatDesktop
+              @if (bridge.info(); as info) {
+                <span class="chip">v{{ info.version }}</span>
+                @if (info.devMode) {
+                  <span class="chip chip-warning">Dev mode</span>
+                }
+              }
+              @if (!bridge.isHosted) {
+                <span class="chip chip-info">Browser preview</span>
+              }
+            </div>
+            <p class="muted">A calm desktop companion for notes, tasks and focused work. Everything stays on this PC.</p>
+          </div>
+        </div>
+
+        <dl class="info-grid">
+          <div class="info-item">
+            <dt>Transport</dt>
+            <dd class="mono">{{ bridge.transportName }}</dd>
+          </div>
+          <div class="info-item">
+            <dt>Window</dt>
+            <dd class="mono">{{ bridge.windowKind }}</dd>
+          </div>
+          @if (bridge.info(); as info) {
+            <div class="info-item">
+              <dt>Platform</dt>
+              <dd>{{ info.platform }}</dd>
+            </div>
+            <div class="info-item">
+              <dt>Started</dt>
+              <dd>{{ formatDate(info.startedAt) }}</dd>
+            </div>
+            <div class="info-item info-wide">
+              <dt>Data folder</dt>
+              <dd class="mono selectable">{{ info.dataDirectory }}</dd>
+            </div>
+          }
+        </dl>
+
+        <div class="section-actions">
+          <button type="button" class="btn btn-ghost" (click)="openDataFolder()" [disabled]="busy()"><app-icon name="folder" [size]="16" /> Open log folder</button>
+          <span class="row-hint">Logs live in the Logs subfolder of the data folder.</span>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+@if (toast(); as t) {
+  <div class="toast" [class.is-error]="t.error" role="status">
+    <app-icon [name]="t.error ? 'warning' : 'check'" [size]="16" />
+    <span>{{ t.text }}</span>
+    <button type="button" class="toast-close" (click)="dismissToast()" aria-label="Dismiss"><app-icon name="close" [size]="14" /></button>
+  </div>
+}
+
+<app-confirm-dialog />

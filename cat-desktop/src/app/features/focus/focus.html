@@ -1,0 +1,179 @@
+<div class="page fade-up">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Focus</h1>
+      <p class="page-subtitle">Work in focused sessions, rest on purpose.</p>
+    </div>
+    <div class="page-actions" role="group" aria-label="Quick start">
+      @for (phase of phases; track phase) {
+        <button
+          type="button"
+          class="btn"
+          [class.btn-soft]="focus.phase() === phase"
+          [disabled]="busy() || focus.isRunning()"
+          (click)="startPhase(phase)"
+          [title]="'Start a ' + minutesFor(phase) + ' minute ' + labelFor(phase).toLowerCase()"
+        >
+          <app-icon [name]="phase === 'focus' ? 'timer' : 'sparkles'" [size]="16" />
+          {{ labelFor(phase) }} <span class="muted">{{ minutesFor(phase) }}m</span>
+        </button>
+      }
+    </div>
+  </header>
+
+  @if (celebration(); as done) {
+    <div class="celebration" role="status">
+      <app-icon name="sparkles" [size]="22" />
+      <div class="celebration-text">
+        <strong>{{ done.phase === 'focus' ? 'Focus session complete!' : labelFor(done.phase) + ' is over.' }}</strong>
+        <span>{{ done.phase === 'focus' ? 'Nice work. Time for a ' + labelFor(done.next).toLowerCase() + '.' : 'Ready to get back into it?' }}</span>
+      </div>
+      <button type="button" class="btn btn-primary btn-sm" (click)="startPhase(done.next)">Start {{ labelFor(done.next).toLowerCase() }}</button>
+      <button type="button" class="btn btn-ghost btn-icon btn-sm" (click)="dismissCelebration()" aria-label="Dismiss"><app-icon name="close" [size]="16" /></button>
+    </div>
+  }
+
+  @if (error(); as message) {
+    <div class="alert" role="alert">
+      <app-icon name="warning" [size]="18" />
+      <span>{{ message }}</span>
+      <button type="button" class="btn btn-ghost btn-sm" (click)="error.set(null)">Dismiss</button>
+    </div>
+  }
+
+  <div class="layout">
+    <section class="card timer-card" [class.is-break]="focus.phase() !== 'focus'">
+      <div class="ring-wrap">
+        <svg class="ring" viewBox="0 0 280 280" role="img" [attr.aria-label]="focus.phaseLabel() + ', ' + focus.remainingLabel() + ' remaining'">
+          <defs>
+            <linearGradient id="focus-ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ff8c5a" />
+              <stop offset="55%" stop-color="#ff6b6b" />
+              <stop offset="100%" stop-color="#d64878" />
+            </linearGradient>
+            <linearGradient id="break-ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#4cc9f0" />
+              <stop offset="100%" stop-color="#06d6a0" />
+            </linearGradient>
+          </defs>
+          <circle class="ring-track" cx="140" cy="140" [attr.r]="ringRadius" />
+          <circle
+            class="ring-progress"
+            cx="140"
+            cy="140"
+            [attr.r]="ringRadius"
+            [attr.stroke]="focus.phase() === 'focus' ? 'url(#focus-ring-gradient)' : 'url(#break-ring-gradient)'"
+            [attr.stroke-dasharray]="ringCircumference"
+            [attr.stroke-dashoffset]="dashOffset()"
+          />
+        </svg>
+        <div class="ring-center">
+          <span class="phase-label">{{ focus.phaseLabel() }}</span>
+          <span class="time">{{ focus.remainingLabel() }}</span>
+          <span class="status" [class.is-running]="focus.isRunning()">{{ statusLabel() }}</span>
+        </div>
+      </div>
+
+      <div class="dots" [attr.aria-label]="focus.state().completedFocusSessions + ' focus sessions completed in this cycle'">
+        @for (filled of sessionDots(); track $index) {
+          <span class="dot" [class.is-filled]="filled"></span>
+        }
+        <span class="dots-label">long break</span>
+      </div>
+
+      <div class="controls">
+        @switch (focus.state().status) {
+          @case ('running') {
+            <button type="button" class="btn btn-lg" (click)="pause()" [disabled]="busy()"><app-icon name="pause" /> Pause</button>
+            <button type="button" class="btn btn-lg btn-ghost" (click)="stop()" [disabled]="busy()"><app-icon name="stop" /> Stop</button>
+            <button type="button" class="btn btn-lg btn-ghost" (click)="skip()" [disabled]="busy()" title="Skip to the next phase"><app-icon name="skip" /> Skip</button>
+          }
+          @case ('paused') {
+            <button type="button" class="btn btn-lg btn-primary" (click)="resume()" [disabled]="busy()"><app-icon name="play" /> Resume</button>
+            <button type="button" class="btn btn-lg btn-ghost" (click)="stop()" [disabled]="busy()"><app-icon name="stop" /> Stop</button>
+            <button type="button" class="btn btn-lg btn-ghost" (click)="skip()" [disabled]="busy()" title="Skip to the next phase"><app-icon name="skip" /> Skip</button>
+          }
+          @default {
+            <button type="button" class="btn btn-lg btn-primary" (click)="start()" [disabled]="busy()">
+              <app-icon name="play" /> Start {{ focus.phaseLabel().toLowerCase() }}
+            </button>
+            @if (focus.state().completedFocusSessions > 0 || focus.state().status === 'completed') {
+              <button type="button" class="btn btn-lg btn-ghost" (click)="reset()" [disabled]="busy()" title="Reset the session cycle"><app-icon name="refresh" /> Reset</button>
+            }
+          }
+        }
+      </div>
+    </section>
+
+    <div class="side">
+      <section class="stat-grid stats">
+        <div class="stat">
+          <span class="stat-label"><app-icon name="sparkles" [size]="16" /> Today</span>
+          <span class="stat-value">{{ focus.stats().todayFocusSessions }}</span>
+          <span class="stat-meta">sessions</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label"><app-icon name="clock" [size]="16" /> Today</span>
+          <span class="stat-value">{{ focus.stats().todayFocusMinutes }}</span>
+          <span class="stat-meta">minutes</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label"><app-icon name="check" [size]="16" /> All time</span>
+          <span class="stat-value">{{ focus.stats().totalFocusSessions }}</span>
+          <span class="stat-meta">sessions</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label"><app-icon name="timer" [size]="16" /> All time</span>
+          <span class="stat-value">{{ focus.stats().totalFocusMinutes }}</span>
+          <span class="stat-meta">minutes</span>
+        </div>
+      </section>
+
+      <form class="card settings-card" (submit)="$event.preventDefault(); saveSettings()">
+        <div class="card-header">
+          <h2 class="card-title"><app-icon name="settings" [size]="18" /> Timer settings</h2>
+          @if (savedFlash()) {
+            <span class="chip chip-success"><app-icon name="check" [size]="12" /> Saved</span>
+          } @else if (formDirty()) {
+            <span class="chip chip-warning">Unsaved</span>
+          }
+        </div>
+
+        <div class="form-grid">
+          <label class="field">
+            <span class="field-label">Focus (minutes)</span>
+            <input class="input" type="number" [min]="limits.focusMinutes.min" [max]="limits.focusMinutes.max" step="1" [class.is-invalid]="formErrors().focusMinutes" [value]="numberValue('focusMinutes')" (input)="patchNumber('focusMinutes', $any($event.target).value)" />
+          </label>
+          <label class="field">
+            <span class="field-label">Short break (minutes)</span>
+            <input class="input" type="number" [min]="limits.shortBreakMinutes.min" [max]="limits.shortBreakMinutes.max" step="1" [class.is-invalid]="formErrors().shortBreakMinutes" [value]="numberValue('shortBreakMinutes')" (input)="patchNumber('shortBreakMinutes', $any($event.target).value)" />
+          </label>
+          <label class="field">
+            <span class="field-label">Long break (minutes)</span>
+            <input class="input" type="number" [min]="limits.longBreakMinutes.min" [max]="limits.longBreakMinutes.max" step="1" [class.is-invalid]="formErrors().longBreakMinutes" [value]="numberValue('longBreakMinutes')" (input)="patchNumber('longBreakMinutes', $any($event.target).value)" />
+          </label>
+          <label class="field">
+            <span class="field-label">Sessions before long break</span>
+            <input class="input" type="number" [min]="limits.sessionsBeforeLongBreak.min" [max]="limits.sessionsBeforeLongBreak.max" step="1" [class.is-invalid]="formErrors().sessionsBeforeLongBreak" [value]="numberValue('sessionsBeforeLongBreak')" (input)="patchNumber('sessionsBeforeLongBreak', $any($event.target).value)" />
+          </label>
+        </div>
+
+        @for (message of formErrorList(); track message) {
+          <p class="field-error">{{ message }}</p>
+        }
+
+        <div class="toggles">
+          <app-toggle label="Auto-start breaks" [checked]="form().autoStartBreaks" (checkedChange)="patchFlag('autoStartBreaks', $event)" />
+          <app-toggle label="Auto-start focus after a break" [checked]="form().autoStartFocus" (checkedChange)="patchFlag('autoStartFocus', $event)" />
+          <app-toggle label="Notify when a phase ends" [checked]="form().notify" (checkedChange)="patchFlag('notify', $event)" />
+          <app-toggle label="Play a sound" [checked]="form().sound" (checkedChange)="patchFlag('sound', $event)" />
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-ghost" (click)="revertForm()" [disabled]="!formDirty()">Revert</button>
+          <button type="submit" class="btn btn-primary" [disabled]="!formDirty() || !formValid() || busy()">Save settings</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

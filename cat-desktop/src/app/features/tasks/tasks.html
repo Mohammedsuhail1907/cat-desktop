@@ -1,0 +1,186 @@
+<div class="page fade-up">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Tasks</h1>
+      <p class="page-subtitle">{{ tasks.openCount() }} open &middot; {{ completedTasks().length }} completed</p>
+    </div>
+  </header>
+
+  @if (error(); as message) {
+    <div class="alert" role="alert">
+      <app-icon name="warning" [size]="18" />
+      <span>{{ message }}</span>
+      <button type="button" class="btn btn-ghost btn-sm" (click)="error.set(null)">Dismiss</button>
+    </div>
+  }
+
+  <form class="card add-form" (submit)="$event.preventDefault(); add()">
+    <div class="add-main">
+      <app-icon name="plus" [size]="18" class="add-icon" />
+      <label class="visually-hidden" for="task-title">Task title</label>
+      <input
+        id="task-title"
+        class="add-input"
+        type="text"
+        placeholder="Add a task and press Enter"
+        autocomplete="off"
+        [value]="newTitle()"
+        (input)="newTitle.set($any($event.target).value)"
+      />
+    </div>
+    <div class="add-options">
+      <label class="field-inline">
+        <span class="visually-hidden">Priority</span>
+        <select class="select" (change)="onPrioritySelect($any($event.target).value)" aria-label="Priority">
+          @for (p of priorities; track p) {
+            <option [value]="p" [selected]="p === newPriority()">{{ priorityLabels[p] }} priority</option>
+          }
+        </select>
+      </label>
+      <label class="field-inline">
+        <span class="visually-hidden">Due date</span>
+        <input class="input" type="date" min="1970-01-01" max="9999-12-31" [class.is-invalid]="newDueInvalid()" [value]="newDue()" (input)="newDue.set($any($event.target).value)" aria-label="Due date" />
+      </label>
+      <button type="submit" class="btn btn-primary" [disabled]="!canAdd()">Add</button>
+    </div>
+  </form>
+
+  <section class="card list-card" aria-label="Open tasks">
+    @if (tasks.error(); as message) {
+      <div class="alert" role="alert">
+        <app-icon name="warning" [size]="18" />
+        <span>Tasks could not be loaded: {{ message }}</span>
+        <button type="button" class="btn btn-ghost btn-sm" (click)="tasks.refresh()" [disabled]="tasks.loading()">Retry</button>
+      </div>
+    }
+    @if (openTasks().length > 0) {
+      <ul class="task-list">
+        @for (task of openTasks(); track task.id) {
+          <li class="task-row" [class.is-editing]="editingId() === task.id">
+            <label class="check">
+              <input type="checkbox" [checked]="task.completed" (change)="toggle(task)" [attr.aria-label]="'Complete ' + task.title" />
+              <span class="check-box"><app-icon name="check" [size]="14" /></span>
+            </label>
+
+            @if (editingId() === task.id) {
+              <input
+                #editInput
+                class="edit-input"
+                type="text"
+                aria-label="Edit task title"
+                [value]="editingTitle()"
+                (input)="editingTitle.set($any($event.target).value)"
+                (keydown.enter)="commitEdit(task)"
+                (keydown.escape)="cancelEdit()"
+                (blur)="commitEdit(task)"
+              />
+            } @else {
+              <button type="button" class="title-btn" (dblclick)="startEdit(task)" (keydown.enter)="startEdit(task)" title="Double-click or press Enter to rename">
+                {{ task.title }}
+              </button>
+            }
+
+            <button
+              type="button"
+              class="chip priority"
+              [class.chip-warning]="task.priority === 1"
+              [class.chip-danger]="task.priority === 2"
+              (click)="cyclePriority(task)"
+              [title]="'Priority: ' + priorityLabels[task.priority] + ' (click to change)'"
+            >
+              <app-icon name="flag" [size]="12" />
+              {{ priorityLabels[task.priority] }}
+            </button>
+
+            @if (dueEditingId() === task.id) {
+              <span class="due-editor">
+                <input
+                  #dueInput
+                  class="input input-sm"
+                  type="date"
+                  min="1970-01-01"
+                  max="9999-12-31"
+                  aria-label="Due date"
+                  [value]="dueInputValue(task)"
+                  (keydown.enter)="commitDue(task, dueInput)"
+                  (keydown.escape)="dueEditingId.set(null)"
+                  (blur)="commitDue(task, dueInput)"
+                />
+                @if (task.dueAt) {
+                  <button type="button" class="btn btn-ghost btn-icon btn-sm" (mousedown)="$event.preventDefault()" (click)="clearDue(task)" aria-label="Clear due date">
+                    <app-icon name="close" [size]="14" />
+                  </button>
+                }
+              </span>
+            } @else {
+              <button
+                type="button"
+                class="chip due"
+                [class.is-empty]="!task.dueAt"
+                [class.chip-danger]="dueStatus(task) === 'overdue'"
+                [class.chip-accent]="dueStatus(task) === 'today'"
+                [class.chip-info]="dueStatus(task) === 'tomorrow'"
+                (click)="startDueEdit(task)"
+                [title]="task.dueAt ? 'Change due date' : 'Set due date'"
+              >
+                <app-icon name="calendar" [size]="12" />
+                @if (task.dueAt) {
+                  {{ dueStatus(task) === 'overdue' ? 'Overdue · ' + dueLabel(task) : dueLabel(task) }}
+                } @else {
+                  <span class="due-placeholder">Due date</span>
+                }
+              </button>
+            }
+
+            <span class="row-actions">
+              <button type="button" class="btn btn-ghost btn-icon btn-sm" (click)="startEdit(task)" aria-label="Rename task" title="Rename">
+                <app-icon name="edit" [size]="15" />
+              </button>
+              <button type="button" class="btn btn-ghost btn-icon btn-sm danger" (click)="remove(task)" aria-label="Delete task" title="Delete">
+                <app-icon name="trash" [size]="15" />
+              </button>
+            </span>
+          </li>
+        }
+      </ul>
+    } @else if (!tasks.error()) {
+      <app-empty-state icon="check" title="Nothing to do" description="Your list is empty. Add a task above to get started." />
+    }
+  </section>
+
+  @if (completedTasks().length > 0) {
+    <section class="card completed-card" aria-label="Completed tasks">
+      <div class="completed-header">
+        <button type="button" class="collapse-btn" (click)="completedExpanded.set(!completedExpanded())" [attr.aria-expanded]="completedExpanded()">
+          <app-icon [name]="completedExpanded() ? 'chevron-down' : 'chevron-right'" [size]="16" />
+          Completed <span class="count">{{ completedTasks().length }}</span>
+        </button>
+        <button type="button" class="btn btn-ghost btn-sm" (click)="clearCompleted()" [disabled]="busy()">
+          <app-icon name="trash" [size]="15" /> Clear completed
+        </button>
+      </div>
+
+      @if (completedExpanded()) {
+        <ul class="task-list">
+          @for (task of completedTasks(); track task.id) {
+            <li class="task-row is-done">
+              <label class="check">
+                <input type="checkbox" [checked]="task.completed" (change)="toggle(task)" [attr.aria-label]="'Reopen ' + task.title" />
+                <span class="check-box"><app-icon name="check" [size]="14" /></span>
+              </label>
+              <span class="title-btn done-title">{{ task.title }}</span>
+              <span class="done-time">{{ task.completedAt | relativeTime }}</span>
+              <span class="row-actions">
+                <button type="button" class="btn btn-ghost btn-icon btn-sm danger" (click)="remove(task)" aria-label="Delete task" title="Delete">
+                  <app-icon name="trash" [size]="15" />
+                </button>
+              </span>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+</div>
+
+<app-confirm-dialog />

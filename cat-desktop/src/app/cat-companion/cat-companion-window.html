@@ -1,0 +1,52 @@
+<div class="stage">
+  @if (mode() !== 'cat') {
+    <div class="surface">
+      @if (mode() === 'menu') {
+        <app-cat-context-menu
+          #surfaceCard
+          data-cat-hit
+          [autoWalk]="settings().autoWalk"
+          [alwaysOnTop]="settings().alwaysOnTop"
+          [status]="menuStatus()"
+          (command)="onMenuCommand($event)"
+          (closed)="interaction.close()"
+        />
+      } @else {
+        <app-cat-companion-panel
+          #surfaceCard
+          data-cat-hit
+          [tab]="interaction.panelTab()"
+          [actions]="quickActions.enabledActions()"
+          [pinned]="settings().alwaysOnTop"
+          (tabChange)="interaction.panelTab.set($event)"
+          (action)="runQuickAction($event)"
+          (closed)="interaction.close()"
+          (hide)="hideCat()"
+        />
+      }
+    </div>
+  }
+
+  <div
+    #catBox
+    class="cat-box"
+    data-cat-hit
+    role="button"
+    tabindex="0"
+    aria-haspopup="menu"
+    draggable="false"
+    [attr.aria-label]="catLabel()"
+    [attr.data-state]="behavior.state()"
+  >
+    <app-cat-sprite
+      [theme]="settings().theme"
+      [attentive]="animation.attentive()"
+      [animation]="animation.animation()"
+      [facing]="animation.facing()"
+      [rate]="animation.rate()"
+      [paused]="animation.paused()"
+      [gaze]="animation.gaze()"
+      (finished)="animation.onFinished($event)"
+    />
+  </div>
+</div>

@@ -1,0 +1,100 @@
+/* Fills the host window (or the CatOverlay box). Only the cat and the menu/panel card take the mouse:
+   the host enforces that with the window hit region, the browser overlay with pointer-events. */
+:host {
+  position: absolute;
+  inset: 0;
+  display: block;
+  color: var(--text);
+  pointer-events: none;
+  --cat-surface-origin: bottom center;
+}
+
+.stage {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+/* The menu/panel side of the window (contract §7). 8 px of transparent padding holds the card's shadow. */
+.surface {
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 0;
+  padding: 8px;
+
+  > * {
+    pointer-events: auto;
+  }
+
+  > app-cat-companion-panel {
+    flex: 1;
+  }
+}
+
+.cat-box {
+  grid-row: 2;
+  justify-self: end;
+  width: var(--cat-box-width, 100%);
+  height: var(--cat-box-height, 100%);
+  opacity: var(--cat-opacity, 1);
+  border-radius: 12px;
+  cursor: grab;
+  touch-action: none;
+  pointer-events: auto;
+  outline: none;
+  -webkit-user-drag: none;
+  transition: opacity var(--duration-base) var(--ease-out);
+
+  &:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--accent);
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+/* Anchor = the window corner holding the cat box; the card opens on the other side. */
+:host(.anchor-top-left),
+:host(.anchor-top-right) {
+  --cat-surface-origin: top center;
+
+  .stage {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .cat-box {
+    grid-row: 1;
+  }
+
+  .surface {
+    grid-row: 2;
+    justify-content: flex-start;
+  }
+}
+
+:host(.anchor-top-left),
+:host(.anchor-bottom-left) {
+  .cat-box {
+    justify-self: start;
+  }
+}
+
+/* After the anchor rules: in the plain cat layout the window is the cat box. */
+:host(.mode-cat) {
+  .stage {
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .cat-box {
+    grid-row: 1;
+  }
+}
+
+:host(.is-inert) .cat-box {
+  cursor: default;
+}

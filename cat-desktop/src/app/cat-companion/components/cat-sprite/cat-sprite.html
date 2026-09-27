@@ -1,0 +1,418 @@
+<div class="vector" [class.off]="spriteClip() !== null">
+<svg class="cat" viewBox="0 0 160 120" aria-hidden="true" focusable="false">
+  <defs>
+    <!-- Paint servers. Colours come from the theme (CSS custom properties on the host, see cat-themes.ts). -->
+    <linearGradient [attr.id]="ids.body" gradientUnits="userSpaceOnUse" x1="0" y1="71" x2="0" y2="105">
+      <stop offset="0" class="k-hi" />
+      <stop offset=".5" class="k-fur" />
+      <stop offset="1" class="k-shade" />
+    </linearGradient>
+    <radialGradient [attr.id]="ids.head" gradientUnits="userSpaceOnUse" cx="108" cy="52" r="33" fx="104" fy="46">
+      <stop offset="0" class="k-hi" />
+      <stop offset=".6" class="k-fur" />
+      <stop offset="1" class="k-shade" />
+    </radialGradient>
+    <linearGradient [attr.id]="ids.limb" gradientUnits="userSpaceOnUse" x1="0" y1="86" x2="0" y2="118">
+      <stop offset="0" class="k-fur" />
+      <stop offset="1" class="k-paw" />
+    </linearGradient>
+    <linearGradient [attr.id]="ids.tail" gradientUnits="userSpaceOnUse" x1="0" y1="73" x2="0" y2="85">
+      <stop offset="0" class="k-hi" />
+      <stop offset=".55" class="k-fur" />
+      <stop offset="1" class="k-shade" />
+    </linearGradient>
+    <linearGradient [attr.id]="ids.sitBody" gradientUnits="userSpaceOnUse" x1="70" y1="62" x2="104" y2="118">
+      <stop offset="0" class="k-hi" />
+      <stop offset=".5" class="k-fur" />
+      <stop offset="1" class="k-shade" />
+    </linearGradient>
+    <linearGradient [attr.id]="ids.sleepBody" gradientUnits="userSpaceOnUse" x1="0" y1="80" x2="0" y2="118">
+      <stop offset="0" class="k-hi" />
+      <stop offset=".55" class="k-fur" />
+      <stop offset="1" class="k-shade" />
+    </linearGradient>
+    <linearGradient [attr.id]="ids.dragBody" gradientUnits="userSpaceOnUse" x1="68" y1="0" x2="102" y2="0">
+      <stop offset="0" class="k-shade" />
+      <stop offset=".45" class="k-fur" />
+      <stop offset="1" class="k-hi" />
+    </linearGradient>
+    <radialGradient [attr.id]="ids.iris" cx=".5" cy=".64" r=".64">
+      <stop offset="0" class="k-eye-hi" />
+      <stop offset=".62" class="k-eye" />
+      <stop offset="1" class="k-eye-lo" />
+    </radialGradient>
+    <radialGradient [attr.id]="ids.mask" gradientUnits="userSpaceOnUse" cx="115" cy="64" r="15.5">
+      <stop offset="0" class="k-point" />
+      <stop offset=".5" class="k-point" stop-opacity=".9" />
+      <stop offset="1" class="k-point" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient [attr.id]="ids.shadow">
+      <stop offset="0" stop-color="#2b1d15" stop-opacity=".42" />
+      <stop offset=".45" stop-color="#2b1d15" stop-opacity=".22" />
+      <stop offset="1" stop-color="#2b1d15" stop-opacity="0" />
+    </radialGradient>
+    <clipPath [attr.id]="ids.clipTorso">
+      <path d="M60,75.2 C68,72.6 86,72 97.5,73.6 C106,74.8 111,81 110.4,89.4 C109.8,97.6 104,103.4 95,103.8 L67.4,103.8 C58.6,103.8 52.6,97.6 52.6,89.2 C52.6,82.6 55,77.4 60,75.2 Z" />
+    </clipPath>
+    <clipPath [attr.id]="ids.clipSit">
+      <path d="M90,58.4 C82.6,63 76,71 72,81 C68,91 66.5,102 68.5,110 C69.8,115.4 73,117.6 77,117.6 L102,117.6 C106,110 109.5,98 110,86 C110.4,76 108.8,66 103,59.8 Z" />
+    </clipPath>
+    <clipPath [attr.id]="ids.clipSleep">
+      <path d="M46,117.6 C40,108 44,92 58,86 C72,80 96,80 108,86 C118,91 124,100 124,108 C124,114 120,117.6 114,117.6 Z" />
+    </clipPath>
+    <clipPath [attr.id]="ids.clipDrag">
+      <path d="M63.6,26 C63.4,20.4 65.4,15.6 68.4,13.4 C71.4,15.4 73.4,19.6 74,24.6 C80,32 92,38 97.6,50 C101.4,58 101.4,70 99.4,78.6 C97.2,88.6 90.4,94.6 82.8,94.2 C74.6,93.8 67.8,86.6 65.6,76 C63.2,64 62.6,40 63.6,26 Z" />
+    </clipPath>
+    <clipPath [attr.id]="ids.clipEyeN">
+      <ellipse cx="104.2" cy="59.2" rx="5.4" ry="6.4" />
+    </clipPath>
+    <clipPath [attr.id]="ids.clipEyeF">
+      <ellipse cx="123.8" cy="58.8" rx="4.7" ry="6.1" />
+    </clipPath>
+  </defs>
+
+  <!-- The head, shared by every pose: a 3/4 face turned toward the viewer, authored for the standing cat
+       (neck pivot 104,76), facing right. -->
+  <ng-template #head>
+    <g class="ear ear-f">
+      <g class="earp">
+        <path class="c-ear" d="M116.8,43.6 C119,38.6 122.6,34.2 126.8,31 C128,30.1 129.6,30.4 130.2,31.8 C132.4,37.8 132.6,44.8 131,52 Z" />
+        <path class="c-inner ns" d="M120.6,44 C122.2,40.4 124.8,37.2 127.6,34.8 C128.8,38.2 129.2,42 128.6,46.4 Z" />
+      </g>
+    </g>
+    <g class="ear ear-n">
+      <g class="earp">
+        <path class="c-ear" d="M93.8,53 C92.2,45.6 92.6,37.8 95.4,31.4 C96.1,29.9 97.8,29.6 99,30.6 C103.4,34.2 107,38.8 109,44.2 Z" />
+        <path class="c-inner ns" d="M96.4,48.6 C95.8,42.8 96.4,38 98,34.6 C101,37.4 103.6,40.8 105.2,44.6 Z" />
+        <path class="tuft dtl" d="M98.4,46.4 C98.8,42.8 99.8,40.2 101.2,38.4 M101.4,46.6 C102,44 103,42.2 104.4,41.2" />
+      </g>
+    </g>
+    <path class="skull" [attr.fill]="paint.head" d="M112,40.5 C125.5,40.5 134.5,48.5 134.5,58 C134.5,62 133.7,64.6 132.4,66.6 C133.6,67.2 134.2,68.2 133.6,69 C132.4,69.6 131.6,70.2 131.4,71 C131.8,72 131.2,73 129.4,73.2 C125.2,77 119,78.6 112,78.6 C105,78.6 98.8,77 94.6,73.2 C92.8,73 92.2,72 92.6,71 C92.4,70.2 91.6,69.6 90.4,69 C89.8,68.2 90.4,67.2 91.6,66.6 C90.3,64.6 89.5,62 89.5,58 C89.5,48.5 98.5,40.5 112,40.5 Z" />
+    <g class="stripes hs dtl">
+      <path d="M108.4,41.6 C107.8,44 108,46.4 109,48.2" />
+      <path d="M112.4,41 C112.2,43.6 112.4,46 113.2,47.8" />
+      <path d="M116.6,41.6 C117.2,43.8 117.4,46.2 117,48" />
+      <path d="M90.6,61.8 C93,62.2 95,63 96.6,64.2 M91.2,65.2 C93.2,65.4 95,66 96.2,66.8" />
+      <path d="M133.4,61.4 C131.8,61.8 130.6,62.6 129.6,63.6" />
+    </g>
+    <ellipse class="muzzle c-belly ns" cx="115" cy="68.8" rx="7.2" ry="5.2" />
+    <ellipse class="mask ns" cx="115" cy="64.6" rx="15.5" ry="12.5" [attr.fill]="paint.mask" />
+    <g class="blush ns">
+      <ellipse cx="98" cy="67.6" rx="4.2" ry="2.4" />
+      <ellipse cx="130" cy="67.1" rx="2.9" ry="2.1" />
+    </g>
+    <g class="eye en">
+      <g class="eyeb">
+        <g class="eyew">
+          <ellipse class="iris" cx="104.2" cy="59.2" rx="5.4" ry="6.4" [attr.fill]="paint.iris" />
+          <g class="pupil ns">
+            <ellipse class="c-pupil" cx="104.9" cy="59.9" rx="3.3" ry="4.4" />
+            <circle class="c-white" cx="106.7" cy="56.6" r="1.8" />
+            <circle class="c-white" cx="103" cy="62.4" r=".85" />
+          </g>
+          <g [attr.clip-path]="paint.clipEyeN">
+            <path class="lid c-fur" d="M97.8,51.8 H110.6 V64.6 Q104.2,68.2 97.8,64.6 Z" />
+          </g>
+          <ellipse class="eye-ol" cx="104.2" cy="59.2" rx="5.4" ry="6.4" />
+        </g>
+      </g>
+    </g>
+    <g class="eye ef">
+      <g class="eyeb">
+        <g class="eyew">
+          <ellipse class="iris" cx="123.8" cy="58.8" rx="4.7" ry="6.1" [attr.fill]="paint.iris" />
+          <g class="pupil ns">
+            <ellipse class="c-pupil" cx="124.5" cy="59.4" rx="2.8" ry="4.1" />
+            <circle class="c-white" cx="126.1" cy="56.3" r="1.5" />
+            <circle class="c-white" cx="122.9" cy="61.9" r=".7" />
+          </g>
+          <g [attr.clip-path]="paint.clipEyeF">
+            <path class="lid c-fur" d="M118.1,51.7 H129.5 V63.9 Q123.8,67.3 118.1,63.9 Z" />
+          </g>
+          <ellipse class="eye-ol" cx="123.8" cy="58.8" rx="4.7" ry="6.1" />
+        </g>
+      </g>
+    </g>
+    <g class="eye-closed">
+      <path d="M99.2,60.2 Q104.2,64.6 109.2,60.2" />
+      <path d="M119.4,59.8 Q123.8,63.8 128.2,59.8" />
+    </g>
+    <g class="eye-happy">
+      <path d="M99.4,61.8 Q104.2,55.4 109,61.8" />
+      <path d="M119.6,61.4 Q123.8,55.2 128,61.4" />
+    </g>
+    <path class="nose" d="M113.2,64.4 Q115,63.6 116.8,64.4 Q116.4,66 115,66.6 Q113.6,66 113.2,64.4 Z" />
+    <path class="mouth" d="M115,66.6 V68.3 M111.8,68.3 Q113.4,70 115,68.3 Q116.6,70 118.2,68.3" />
+    <g class="mouth-o">
+      <ellipse class="c-mouth" cx="115" cy="70.6" rx="3.8" ry="3.6" />
+      <ellipse class="c-tongue ns" cx="115" cy="72.4" rx="2.5" ry="1.5" />
+    </g>
+    <g class="whiskers dtl">
+      <path d="M95.8,68.6 C92,67.9 88.6,67.8 85.2,68.3 M96.2,70.6 C92.6,70.9 89.6,71.7 86.8,72.9" />
+      <path d="M131.4,68.2 C134.2,67.5 136.6,67.4 138.8,67.8 M131,70.2 C133.6,70.5 135.8,71.1 137.8,72" />
+    </g>
+  </ng-template>
+
+  @for (slot of standSlots; track slot) {
+    <g class="layer stand" [attr.data-slot]="slot">
+      <ellipse class="shadow ns" cx="80" cy="117.6" rx="38" ry="3.6" [attr.fill]="paint.shadow" />
+      <g class="rig">
+        <g class="body">
+          <!-- far legs (behind the body, darker) -->
+          <g class="far" transform="translate(3.5 -1.2)">
+            <g class="hu">
+              <g class="hl">
+                <path class="c-far" d="M62.42,97.9 L60.5,109.52 A4.6,4.6 0 0 0 69.5,111.48 L72.58,100.1" />
+                <g class="hp">
+                  <path class="c-farpaw" d="M60.5,110.8 C60,114.6 61.8,118 65.4,118 L68.2,118 C71.6,118 72.8,115.8 71.8,113.6 C71.2,112.2 70.4,111.2 70,110.4" />
+                </g>
+              </g>
+              <path class="c-far thigh" d="M61.4,84 C64.6,81 71.2,81.2 74.2,85.4 C77,89.2 76.4,95.4 73,98.4 C70.4,100.8 65.4,101 62.6,99" />
+            </g>
+          </g>
+          <g class="far" transform="translate(-3.5 -1.2)">
+            <g class="fu">
+              <path class="c-far" d="M94.5,92.6 L94.8,99.6 A5,5 0 0 0 104.8,99.4 L104.9,92.4" />
+              <g class="fl">
+                <path class="c-far" d="M94.83,100.04 L96.43,111 A4.6,4.6 0 0 0 105.57,110 L104.77,98.96" />
+                <g class="fp">
+                  <path class="c-farpaw" d="M96.5,110.8 C96,114.6 97.8,118 101.4,118 L104.2,118 C107.6,118 108.8,115.8 107.8,113.6 C107.2,112.2 106.4,111.2 106,110.4" />
+                </g>
+              </g>
+            </g>
+          </g>
+
+          <!-- tail: seven segments, authored straight out to the left of the rump; every pose is a set of rotations -->
+          <g class="tp">
+            <g class="tail ts t1" style="--n: 1" [attr.fill]="paint.tail">
+              <path d="M57,74 L50,73.4 A5.6,5.6 0 0 0 50,84.6 L57,84" />
+              <g class="ts" style="--n: 2">
+                <path d="M50,73.4 L43,73.1 A5.9,5.9 0 0 0 43,84.9 L50,84.6" />
+                <path class="ring" d="M46.5,73.9 V84.1" />
+                <g class="ts" style="--n: 3">
+                  <path d="M43,73.1 L36,73 A6,6 0 0 0 36,85 L43,84.9" />
+                  <g class="ts" style="--n: 4">
+                    <path d="M36,73 L29,73.2 A5.8,5.8 0 0 0 29,84.8 L36,85" />
+                    <path class="ring" d="M32.5,73.9 V84.1" />
+                    <g class="ts" style="--n: 5">
+                      <path d="M29,73.2 L22,73.6 A5.4,5.4 0 0 0 22,84.4 L29,84.8" />
+                      <g class="ts" style="--n: 6">
+                        <path d="M22,73.6 L15,74.2 A4.8,4.8 0 0 0 15,83.8 L22,84.4" />
+                        <path class="ring" d="M18.5,74.7 V83.3" />
+                        <g class="ts" style="--n: 7">
+                          <g class="tip">
+                            <path class="c-tip" d="M15,74.2 L8,74.8 A4.2,4.2 0 0 0 8,83.2 L15,83.8" />
+                          </g>
+                        </g>
+                      </g>
+                    </g>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+
+          <g class="torso">
+            <path [attr.fill]="paint.body" d="M60,75.2 C68,72.6 86,72 97.5,73.6 C106,74.8 111,81 110.4,89.4 C109.8,97.6 104,103.4 95,103.8 L67.4,103.8 C58.6,103.8 52.6,97.6 52.6,89.2 C52.6,82.6 55,77.4 60,75.2 Z" />
+            <g class="stripes dtl ns" [attr.clip-path]="paint.clipTorso">
+              <path d="M63.8,72 C65,76 64.8,80 63.6,84.2 L65.6,84.2 C67,80 67.2,76 66.4,72 Z" />
+              <path d="M70.6,71 C71.8,75.6 71.6,80 70.4,84.6 L72.6,84.6 C74,80 74.2,75.6 73.4,71 Z" />
+              <path d="M79.8,70.8 C81,75.4 80.8,79.8 79.6,84.4 L81.8,84.4 C83.2,79.8 83.4,75.4 82.6,70.8 Z" />
+              <path d="M89,71.2 C90,75.4 89.8,79.4 88.8,83.4 L90.8,83.4 C92,79.4 92.2,75.4 91.6,71.2 Z" />
+            </g>
+            <path class="c-belly ns" d="M63,102.6 C70,98.8 86,98.2 99.4,101.2 C100.6,102 100.2,103.2 98.6,103.6 C88,104.2 72,104.2 63,102.6 Z" />
+            <path class="c-belly ns" d="M104.4,77.4 C109.4,79.6 111.2,85.6 110.4,90.8 C109.6,96.4 105.6,100.8 100.4,102.6 C102.2,95.6 102.4,85 104.4,77.4 Z" />
+          </g>
+
+          <!-- arched back (surprised): a dome that rises out of the back line -->
+          <g class="hump">
+            <path class="ns" [attr.fill]="paint.body" d="M58.6,77.6 C62.6,67 75,62.6 84,63 C92.6,63.4 99.6,67.6 101.6,75.4 L100,80 L60,81 Z" />
+            <path class="stripes dtl ns" d="M69.4,66.4 C70.8,70 70.6,73.6 69.4,77.2 L71.4,77.2 C72.8,73.6 73,70 72.2,66.2 Z M81,63.4 C82.2,67.6 82,71.6 80.8,75.4 L82.8,75.4 C84.2,71.6 84.4,67.6 83.6,63.4 Z" />
+            <path fill="none" d="M58.6,77.6 C62.6,67 75,62.6 84,63 C92.6,63.4 99.6,67.6 101.6,75.4" />
+          </g>
+
+          <!-- near hind leg: shin and paw under the round thigh -->
+          <g class="near">
+            <g class="hu">
+              <g class="hl">
+                <path [attr.fill]="paint.limb" d="M62.42,97.9 L60.5,109.52 A4.6,4.6 0 0 0 69.5,111.48 L72.58,100.1" />
+                <g class="hp">
+                  <path class="c-paw" d="M60.5,110.8 C60,114.6 61.8,118 65.4,118 L68.2,118 C71.6,118 72.8,115.8 71.8,113.6 C71.2,112.2 70.4,111.2 70,110.4" />
+                  <path class="toes dtl" d="M68.4,115.6 V117.6 M65.8,115.8 V117.7" />
+                </g>
+              </g>
+              <path class="thigh" [attr.fill]="paint.body" d="M61.4,84 C64.6,81 71.2,81.2 74.2,85.4 C77,89.2 76.4,95.4 73,98.4 C70.4,100.8 65.4,101 62.6,99" />
+              <path class="haunch dtl" d="M66.4,83.4 C67.4,85.6 67.6,88 67,90.4 M71.4,84.4 C72.4,86.6 72.6,89 72,91.4" />
+            </g>
+          </g>
+
+          <!-- near fore leg -->
+          <g class="near">
+            <g class="fu">
+              <path [attr.fill]="paint.limb" d="M94.5,92.6 L94.8,99.6 A5,5 0 0 0 104.8,99.4 L104.9,92.4" />
+              <g class="fl">
+                <path [attr.fill]="paint.limb" d="M94.83,100.04 L96.43,111 A4.6,4.6 0 0 0 105.57,110 L104.77,98.96" />
+                <path class="legstripe dtl" d="M95.4,103.2 L104.6,102.6" />
+                <g class="fp">
+                  <path class="c-paw" d="M96.5,110.8 C96,114.6 97.8,118 101.4,118 L104.2,118 C107.6,118 108.8,115.8 107.8,113.6 C107.2,112.2 106.4,111.2 106,110.4" />
+                  <path class="toes dtl" d="M104.4,115.6 V117.6 M101.8,115.8 V117.7" />
+                </g>
+              </g>
+            </g>
+          </g>
+
+          <g class="head">
+            <g class="gz">
+              <ng-container *ngTemplateOutlet="head" />
+            </g>
+          </g>
+        </g>
+      </g>
+      <g class="clock"></g>
+    </g>
+  }
+  <!-- SIT: upright, round haunch, front legs straight, tail wrapped round the paws -->
+  <g class="layer sit" data-slot="sit">
+    <ellipse class="shadow ns" cx="88" cy="117.6" rx="30" ry="3.4" [attr.fill]="paint.shadow" />
+    <g class="sbody">
+      <g class="far" transform="translate(-5 -1)">
+        <path class="c-far" d="M98,82.09 L98.8,111.08 A4.7,4.7 0 0 0 108.2,110.92 L108,81.91" />
+        <path class="c-farpaw" d="M97.8,110.8 C97.3,114.6 99.1,118 102.7,118 L105.5,118 C108.9,118 110.1,115.8 109.1,113.6 C108.5,112.2 107.7,111.2 107.3,110.4" />
+      </g>
+      <path class="torso" [attr.fill]="paint.sitBody" d="M90,58.4 C82.6,63 76,71 72,81 C68,91 66.5,102 68.5,110 C69.8,115.4 73,117.6 77,117.6 L102,117.6 C106,110 109.5,98 110,86 C110.4,76 108.8,66 103,59.8 Z" />
+      <g class="stripes dtl ns" [attr.clip-path]="paint.clipSit">
+        <path d="M84.2,63.4 C86.8,66.6 88.2,70 88.6,73.6 L86.6,74.2 C85.8,70.8 84.2,67.8 82,65.2 Z" />
+        <path d="M77.6,70 C80.4,72.8 82,76 82.6,79.6 L80.6,80 C79.8,76.8 78,74 75.8,71.8 Z" />
+        <path d="M72.8,78.2 C75.6,80.4 77.4,83.4 78.2,86.8 L76.2,87.2 C75.2,84.2 73.4,81.6 71.2,79.8 Z" />
+      </g>
+      <path class="c-belly ns" d="M108,70 C110.4,78 110.2,90 106.4,100.2 C104.8,104 103,106.6 101.6,108 C102.6,98 102.8,84 104,72 C104.4,70 106,68.6 108,70 Z" />
+      <path class="c-paw" d="M86,112.4 C88.8,111 94,111.2 96.8,113.2 C98.8,114.8 98.6,117.8 95.6,118 L85,118 C82.8,118 82.8,113.6 86,112.4 Z" />
+      <path class="thigh" [attr.fill]="paint.sitBody" d="M69,103.6 C68.6,94.8 74.6,88.6 81.6,88.6 C89.4,88.6 94.6,94.8 94.2,102.8 C94,110 89.2,115.8 82,116.6" />
+      <path class="haunch dtl" d="M74.4,95.4 C77.4,92.8 82.2,92.6 85.6,95 M72.4,101.2 C76,98 83,97.8 87.8,100.8" />
+      <path [attr.fill]="paint.limb" d="M98,82.09 L98.8,111.08 A4.7,4.7 0 0 0 108.2,110.92 L108,81.91" />
+      <path class="legstripe dtl" d="M98.6,95.4 L107.6,95.2 M98.8,100.6 L107.8,100.4" />
+      <path class="c-paw" d="M97.8,110.8 C97.3,114.6 99.1,118 102.7,118 L105.5,118 C108.9,118 110.1,115.8 109.1,113.6 C108.5,112.2 107.7,111.2 107.3,110.4" />
+      <path class="toes dtl" d="M105.7,115.6 V117.6 M103.1,115.8 V117.7" />
+      <g transform="translate(-6 -15)">
+        <g class="head">
+          <g class="gz">
+            <ng-container *ngTemplateOutlet="head" />
+          </g>
+        </g>
+      </g>
+    </g>
+    <g class="stail" fill="none">
+      <path d="M70,110.4 C74,113 86,112.8 98,112.3 C106,111.9 111,111.4 114,109" stroke-width="10" />
+      <path class="stip" d="M114,109 C116.6,106.6 116.6,103 114.2,101" stroke-width="9.6" />
+      <path class="sfill" d="M70,110.4 C74,113 86,112.8 98,112.3 C106,111.9 111,111.4 114,109" stroke-width="7.8" />
+      <path class="sring" d="M70,110.4 C74,113 86,112.8 98,112.3 C106,111.9 111,111.4 114,109" stroke-width="7.9" stroke-dasharray="2.6 7" stroke-dashoffset="-5" />
+      <path class="stip stipfill" d="M114,109 C116.6,106.6 116.6,103 114.2,101" stroke-width="7.4" />
+    </g>
+    <g class="clock"></g>
+  </g>
+
+  <!-- SLEEP: curled up, head resting on the paws, eyes closed, tail tip over the nose -->
+  <g class="layer sleep" data-slot="sleep">
+    <ellipse class="shadow ns" cx="85" cy="117.6" rx="44" ry="3.6" [attr.fill]="paint.shadow" />
+    <g class="slbody">
+      <path class="torso" [attr.fill]="paint.sleepBody" d="M46,117.6 C40,108 44,92 58,86 C72,80 96,80 108,86 C118,91 124,100 124,108 C124,114 120,117.6 114,117.6 Z" />
+      <g class="stripes dtl ns" [attr.clip-path]="paint.clipSleep">
+        <path d="M58.4,83.6 C60,87.2 60.4,90.8 60,94.4 L62,94.6 C62.6,90.8 62.4,87 61,83.2 Z" />
+        <path d="M69,80.8 C70.2,84.6 70.4,88.4 69.8,92 L71.8,92.2 C72.6,88.4 72.6,84.6 71.6,80.6 Z" />
+        <path d="M80,80 C81,84 81,87.8 80.4,91.4 L82.4,91.6 C83.2,87.8 83.2,84 82.4,80 Z" />
+        <path d="M91,80.8 C91.8,84.6 91.8,88.4 91,92 L93,92.2 C94,88.4 94,84.6 93.4,80.8 Z" />
+      </g>
+      <path class="thigh" [attr.fill]="paint.sleepBody" d="M84.8,114 C86.6,104.4 80.6,94.6 70,93.4 C60,92.4 51.6,99.4 50.4,108.2 C50,111.6 50.6,114.8 52,117" />
+      <path class="haunch dtl" d="M56.4,102.8 C60,98.4 67,97.6 72,100.6 M55,108.8 C59,104.2 67,103.6 73,106.8" />
+      <path class="c-paw" d="M83.6,113.4 C86.6,111.8 92,112 94.6,114.2 C96.4,115.8 96,118 93.4,118 L83,118 C81,118 81,114.4 83.6,113.4 Z" />
+      <path class="c-paw" d="M108,112.2 C111.6,110.6 118,110.8 121.4,113 C123.4,114.6 123,118 120,118 L108,118 C105.6,118 105.4,113.2 108,112.2 Z" />
+      <g transform="translate(110 93) rotate(10) scale(.92) translate(-112 -60)">
+        <g class="head">
+          <ng-container *ngTemplateOutlet="head" />
+        </g>
+      </g>
+    </g>
+    <g class="sltail" fill="none">
+      <path d="M50,110.6 C58,113 80,113 98,112.6 C108,112.4 117,112 122,109.4" stroke-width="10" />
+      <path class="stip" d="M122,109.4 C126.8,106.4 127.6,101.2 124.4,98.6 C121.6,96.4 117.4,96.8 114.6,98.6" stroke-width="8.4" />
+      <path class="sfill" d="M50,110.6 C58,113 80,113 98,112.6 C108,112.4 117,112 122,109.4" stroke-width="7.8" />
+      <path class="sring" d="M50,110.6 C58,113 80,113 98,112.6 C108,112.4 117,112 122,109.4" stroke-width="7.9" stroke-dasharray="2.6 7" stroke-dashoffset="-3" />
+      <path class="stip sfill" d="M122,109.4 C126.8,106.4 127.6,101.2 124.4,98.6 C121.6,96.4 117.4,96.8 114.6,98.6" stroke-width="6.4" />
+    </g>
+    <g class="zz ns">
+      <path class="z1" d="M132,64 H136.6 L132,68.8 H136.6" />
+      <path class="z2" d="M139,52.6 H145 L139,58.8 H145" />
+    </g>
+    <g class="clock"></g>
+  </g>
+
+  <!-- DRAGGED: carried by the scruff (the pinched fold at the top left), body hanging, short legs and tail dangling -->
+  <g class="layer drag" data-slot="drag">
+    <ellipse class="shadow ns" cx="80" cy="117.6" rx="14" ry="2" [attr.fill]="paint.shadow" />
+    <g class="dbody">
+      <g transform="translate(68 12) scale(.9) translate(-68 -12)">
+        <g class="dtail" fill="none">
+          <path d="M76,89 C71.4,97.4 70.4,105.4 73.4,110.6 C75.6,114.2 80.4,114.2 82,110.8" stroke-width="10.4" />
+          <path class="sfill" d="M76,89 C71.4,97.4 70.4,105.4 73.4,110.6 C75.6,114.2 80.4,114.2 82,110.8" stroke-width="8" />
+          <path class="sring" d="M76,89 C71.4,97.4 70.4,105.4 73.4,110.6 C75.6,114.2 80.4,114.2 82,110.8" stroke-width="8.1" stroke-dasharray="2.4 6.4" stroke-dashoffset="-6" />
+          <path class="stipfill" d="M74,111.4 C76.2,114.2 80.4,114.2 82,110.8" stroke-width="8" />
+        </g>
+        <g class="far" transform="translate(5 -1.5)">
+          <g class="dhl">
+            <path class="c-far" d="M81.4,88.07 L82,100.57 A4.2,4.2 0 0 0 90.4,100.43 L90.6,87.93" />
+            <ellipse class="c-farpaw" cx="86.4" cy="103.8" rx="4.8" ry="3.8" />
+          </g>
+        </g>
+        <g class="far" transform="translate(-4.5 -1.5)">
+          <g class="dfl">
+            <path class="c-far" d="M90.83,60.55 L93.23,76.5 A4.2,4.2 0 0 0 101.57,75.5 L100.17,59.45 A4.7,4.7 0 0 0 90.83,60.55 Z" />
+            <ellipse class="c-farpaw" cx="97.6" cy="79.2" rx="4.6" ry="3.6" />
+          </g>
+        </g>
+        <path class="torso" [attr.fill]="paint.dragBody" d="M63.6,26 C63.4,20.4 65.4,15.6 68.4,13.4 C71.4,15.4 73.4,19.6 74,24.6 C80,32 92,38 97.6,50 C101.4,58 101.4,70 99.4,78.6 C97.2,88.6 90.4,94.6 82.8,94.2 C74.6,93.8 67.8,86.6 65.6,76 C63.2,64 62.6,40 63.6,26 Z" />
+        <g class="stripes dtl ns" [attr.clip-path]="paint.clipDrag">
+          <path d="M62,48 L74,49 L74,51.4 L62,50.8 Z" />
+          <path d="M62,58.4 L75,59.2 L75,61.6 L62,61.2 Z" />
+          <path d="M62.6,68.8 L75.4,69.2 L75.4,71.6 L62.8,71.6 Z" />
+        </g>
+        <path class="scruff-lines dtl" d="M66.4,20.4 C67.4,23 67.8,25.6 67.6,28.2 M70.2,20 C71,22.6 71.4,25.2 71.2,27.6" />
+        <path class="c-belly ns" d="M98.6,62 C100.6,70 100.6,78 98.4,85 C96.8,89.6 94.6,92 92.4,93.2 C95,84 95.6,74 95.8,65 C96,62.4 97.4,60.6 98.6,62 Z" />
+        <g class="dhl">
+          <path [attr.fill]="paint.limb" d="M81.4,88.07 L82,100.57 A4.2,4.2 0 0 0 90.4,100.43 L90.6,87.93" />
+          <ellipse class="c-paw" cx="86.4" cy="103.8" rx="4.8" ry="3.8" />
+          <path class="toes dtl" d="M85.2,106.2 V107.4 M87.8,106.2 V107.4" />
+          <path class="thigh" [attr.fill]="paint.dragBody" d="M74.6,79 C75.8,74.6 80.4,72.8 84.6,74 C89.2,75.4 91.4,80.4 90.4,85.2 C89.4,90 85,92.8 80.4,92.2" />
+        </g>
+        <g class="dfl">
+          <path [attr.fill]="paint.limb" d="M90.83,60.55 L93.23,76.5 A4.2,4.2 0 0 0 101.57,75.5 L100.17,59.45 A4.7,4.7 0 0 0 90.83,60.55 Z" />
+          <ellipse class="c-paw" cx="97.6" cy="79.2" rx="4.6" ry="3.6" />
+          <path class="toes dtl" d="M98.8,81.4 V82.6 M96.4,81.4 V82.6" />
+        </g>
+        <g transform="translate(92 42) rotate(4) scale(.9) translate(-112 -60)">
+          <g class="head">
+            <g class="gz">
+              <ng-container *ngTemplateOutlet="head" />
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+    <g class="clock"></g>
+  </g>
+</svg>
+</div>
+
+<!-- Sprite skin (assets/cat/cat.manifest.json "skin": "sprites"): frames laid out horizontally, one box width each. -->
+@for (clip of spritePlays(); track clip) {
+  <div class="sprite">
+    <div
+      class="sheet"
+      [class.once]="!clip.loop"
+      [style.width.%]="clip.frames * 100"
+      [style.background-image]="clip.image"
+      [style.animation-duration.ms]="clip.durationMs"
+      [style.animation-timing-function]="sheetSteps(clip.frames)"
+      [style.--n]="clip.frames"
+    ></div>
+  </div>
+}

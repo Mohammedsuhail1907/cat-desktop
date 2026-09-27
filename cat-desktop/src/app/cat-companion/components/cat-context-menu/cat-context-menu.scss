@@ -1,0 +1,114 @@
+/* The host element is the card; it must keep its shadow inside the 8 px window padding (the edge clips it). */
+:host {
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 1px 2px rgba(20, 16, 30, 0.12), 0 2px 6px rgba(20, 16, 30, 0.12);
+  font-size: 13.5px;
+  animation: menu-in var(--duration-base) var(--ease-out) both;
+  transform-origin: var(--cat-surface-origin, bottom center);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 8px 8px;
+}
+
+.badge {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--accent-gradient);
+  color: var(--accent-contrast);
+  flex: none;
+}
+
+.titles {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.title {
+  font-weight: 600;
+}
+
+.status {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.separator {
+  height: 1px;
+  margin: 4px 6px;
+  background: var(--border);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  outline: none;
+  transition: background var(--duration-fast) var(--ease-out);
+
+  &:hover,
+  &:focus-visible,
+  &:focus {
+    background: var(--surface-2);
+  }
+
+  &:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--accent-soft);
+  }
+
+  &:active {
+    background: var(--surface-3);
+  }
+}
+
+.icon {
+  color: var(--text-muted);
+}
+
+.item:hover .icon,
+.item:focus .icon {
+  color: var(--accent-2);
+}
+
+.label {
+  flex: 1;
+  white-space: nowrap;
+}
+
+.check {
+  color: var(--accent-2);
+  opacity: 0;
+
+  &.is-on {
+    opacity: 1;
+  }
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}

@@ -1,0 +1,59 @@
+<div class="shell">
+  <aside class="sidebar">
+    <a class="brand" routerLink="/dashboard" aria-label="CatDesktop home">
+      <img class="brand-logo" src="icon-256.png" alt="" width="36" height="36" />
+      <span class="brand-name">CatDesktop</span>
+    </a>
+
+    <nav class="nav" aria-label="Main">
+      @for (item of navItems; track item.route) {
+        <a class="nav-link" [routerLink]="item.route" routerLinkActive="is-active" ariaCurrentWhenActive="page" [title]="item.label" [attr.aria-label]="item.label">
+          <app-icon [name]="item.icon" />
+          <span class="nav-label">{{ item.label }}</span>
+          @if (item.route === '/tasks' && tasks.openCount() > 0) {
+            <span class="nav-badge">{{ tasks.openCount() }}</span>
+          }
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      @if (focus.isActive()) {
+        <a class="focus-pill" routerLink="/focus" [class.is-paused]="focus.isPaused()" [attr.aria-label]="focus.phaseLabel() + ' ' + focus.remainingLabel()">
+          <app-icon [name]="focus.isRunning() ? 'timer' : 'pause'" [size]="16" />
+          <span class="focus-time">{{ focus.remainingLabel() }}</span>
+          <span class="focus-phase">{{ focus.phaseLabel() }}</span>
+        </a>
+      }
+
+      <button
+        type="button"
+        class="cat-toggle"
+        [class.is-visible]="catOnScreen()"
+        [disabled]="!catEnabled() || catBusy()"
+        [title]="catHint()"
+        [attr.aria-pressed]="catOnScreen()"
+        (click)="toggleCat()"
+      >
+        <span class="cat-avatar"><app-icon name="cat" [size]="18" /></span>
+        <span class="cat-text">
+          <span class="cat-title">Cat</span>
+          <span class="cat-state">
+            @if (!catEnabled()) {
+              Turned off
+            } @else if (catWindow.visible()) {
+              On screen
+            } @else {
+              Hidden
+            }
+          </span>
+        </span>
+        <app-icon class="cat-eye" [name]="catOnScreen() ? 'eye' : 'eye-off'" [size]="16" />
+      </button>
+    </div>
+  </aside>
+
+  <main class="content" id="main-content">
+    <router-outlet />
+  </main>
+</div>

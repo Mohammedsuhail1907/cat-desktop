@@ -1,0 +1,295 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.notes {
+  display: grid;
+  grid-template-columns: 330px minmax(0, 1fr);
+  height: 100%;
+}
+
+.list-pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 22px 18px 12px;
+}
+
+.list-title {
+  font-size: 1.25rem;
+}
+
+.count {
+  margin-left: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-faint);
+}
+
+.search {
+  position: relative;
+  padding: 0 18px 12px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 30px;
+  top: 11px;
+  color: var(--text-faint);
+  pointer-events: none;
+}
+
+.search-input {
+  padding-left: 36px;
+  padding-right: 36px;
+
+  &::-webkit-search-cancel-button {
+    display: none;
+  }
+}
+
+.search-clear {
+  position: absolute;
+  right: 22px;
+  top: 4px;
+}
+
+.note-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 10px 16px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.note-item {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 10px 10px 12px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  text-align: left;
+  color: var(--text);
+
+  &:hover {
+    background: var(--surface-2);
+  }
+
+  &.is-selected {
+    background: var(--accent-soft);
+  }
+}
+
+.dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  margin-top: 6px;
+  border-radius: 50%;
+
+  &.is-empty {
+    background: transparent;
+    border: 1.5px dashed var(--border-strong);
+  }
+}
+
+.item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.item-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.item-title {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-pin {
+  color: var(--accent-2);
+}
+
+.item-snippet {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-time {
+  font-size: 0.76rem;
+  color: var(--text-faint);
+}
+
+.editor-pane {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding: 18px 32px 28px;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.color-chips {
+  display: flex;
+  gap: 6px;
+}
+
+.color-chip {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background: var(--surface-3);
+  transition: transform var(--duration-fast) var(--ease-spring);
+
+  &.is-empty {
+    background: transparent;
+    border-color: var(--border-strong);
+    border-style: dashed;
+  }
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  &.is-active {
+    border-color: var(--text);
+    border-style: solid;
+    transform: scale(1.12);
+  }
+}
+
+.save-state {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: var(--text-faint);
+
+  &.is-error {
+    color: var(--danger);
+  }
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.is-pinned {
+  color: var(--accent-2);
+  background: var(--accent-soft);
+}
+
+.pane-alert {
+  margin: 0 18px 12px;
+  font-size: 0.88rem;
+}
+
+.editor-pane > .pane-alert {
+  margin: 18px 32px 0;
+}
+
+.title-input,
+.content-input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  outline: none;
+
+  &::placeholder {
+    color: var(--text-faint);
+  }
+}
+
+.title-input {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  padding: 4px 0 10px;
+}
+
+.content-input {
+  flex: 1;
+  min-height: 240px;
+  resize: none;
+  font-size: 1rem;
+  line-height: 1.65;
+  padding: 4px 0;
+}
+
+.editor-empty {
+  display: grid;
+  place-items: center;
+  flex: 1;
+}
+
+@media (max-width: 960px) {
+  .notes {
+    grid-template-columns: 260px minmax(0, 1fr);
+  }
+
+  .editor {
+    padding: 14px 16px 20px;
+  }
+
+  .list-header {
+    padding: 18px 12px 10px;
+  }
+
+  .search {
+    padding: 0 12px 10px;
+  }
+
+  .search-icon {
+    left: 24px;
+  }
+
+  .search-clear {
+    right: 16px;
+  }
+}

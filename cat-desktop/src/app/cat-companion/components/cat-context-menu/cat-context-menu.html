@@ -1,0 +1,30 @@
+<header class="head">
+  <span class="badge" aria-hidden="true"><app-icon name="cat" [size]="16" /></span>
+  <span class="titles">
+    <span class="title">Cat Companion</span>
+    @if (status()) {
+      <span class="status">{{ status() }}</span>
+    }
+  </span>
+</header>
+
+@for (item of items(); track item.id) {
+  @if (item.separatorBefore) {
+    <div class="separator" role="separator"></div>
+  }
+  <button
+    type="button"
+    class="item"
+    tabindex="-1"
+    [attr.role]="item.checked === undefined ? 'menuitem' : 'menuitemcheckbox'"
+    [attr.aria-checked]="item.checked === undefined ? null : item.checked"
+    [attr.data-command]="item.id"
+    (click)="command.emit(item.id)"
+  >
+    <app-icon class="icon" [name]="item.icon" [size]="16" />
+    <span class="label">{{ item.label }}</span>
+    @if (item.checked !== undefined) {
+      <app-icon class="check" [class.is-on]="item.checked" name="check" [size]="16" />
+    }
+  </button>
+}

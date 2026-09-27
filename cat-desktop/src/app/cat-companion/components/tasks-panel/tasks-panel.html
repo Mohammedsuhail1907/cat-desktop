@@ -1,0 +1,44 @@
+<form class="add" (submit)="$event.preventDefault(); add()">
+  <input
+    class="add-input"
+    type="text"
+    placeholder="Add a task..."
+    maxlength="300"
+    autocomplete="off"
+    [value]="newTitle()"
+    (input)="newTitle.set($any($event.target).value)"
+  />
+  <button type="submit" class="add-btn" [disabled]="adding() || !newTitle().trim()" aria-label="Add task">+</button>
+</form>
+
+@if (error(); as message) {
+  <p class="error" role="alert">{{ message }}</p>
+}
+
+@if (visible().length > 0) {
+  <ul class="list">
+    @for (task of visible(); track task.id) {
+      <li class="row" [class.p1]="task.priority === 1" [class.p2]="task.priority === 2">
+        <label class="check">
+          <input type="checkbox" [checked]="task.completed" (change)="toggle(task)" />
+          <span class="box" aria-hidden="true"></span>
+          <span class="text">{{ task.title }}</span>
+        </label>
+        @if (task.dueAt) {
+          <span class="due" [class.late]="isOverdue(task)">{{ task.dueAt | date: 'MMM d' }}</span>
+        }
+      </li>
+    }
+  </ul>
+} @else if (tasks.loading()) {
+  <p class="empty">Loading...</p>
+} @else {
+  <p class="empty">All clear. Add a task above.</p>
+}
+
+<footer class="foot">
+  @if (hiddenCount() > 0) {
+    <span class="more">+{{ hiddenCount() }} more</span>
+  }
+  <button type="button" class="link" (click)="openAll()">Open all</button>
+</footer>

@@ -1,0 +1,34 @@
+<form class="note" (submit)="$event.preventDefault(); save()" (keydown)="onKeydown($event)">
+  <input
+    class="field title"
+    type="text"
+    placeholder="Title (optional)"
+    maxlength="200"
+    autocomplete="off"
+    [value]="draft.title()"
+    (input)="draft.setTitle($any($event.target).value)"
+    (keydown)="onTitleKeydown($event)"
+  />
+  <textarea
+    #content
+    class="field body"
+    placeholder="What's on your mind?"
+    rows="6"
+    [value]="draft.body()"
+    (input)="draft.setBody($any($event.target).value)"
+  ></textarea>
+
+  @if (error(); as message) {
+    <p class="error" role="alert">{{ message }}</p>
+  }
+
+  <footer class="actions">
+    <span class="hint">Ctrl+Enter to save</span>
+    <button type="button" class="btn ghost" (click)="cancel()">Cancel</button>
+    <button type="submit" class="btn primary" [disabled]="!canSave()">{{ saving() ? 'Saving...' : 'Save' }}</button>
+  </footer>
+
+  @if (toast(); as text) {
+    <div class="toast" role="status">{{ text }}</div>
+  }
+</form>

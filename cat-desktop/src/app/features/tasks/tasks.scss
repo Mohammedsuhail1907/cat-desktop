@@ -1,0 +1,249 @@
+.add-form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px 10px 16px;
+}
+
+.add-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.add-icon {
+  color: var(--accent-2);
+}
+
+.add-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font-size: 1rem;
+  padding: 8px 0;
+  outline: none;
+
+  &::placeholder {
+    color: var(--text-faint);
+  }
+}
+
+.add-options {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.field-inline .select,
+.field-inline .input {
+  min-height: 34px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  font-size: 0.9rem;
+}
+
+.field-inline .select {
+  width: 150px;
+}
+
+.list-card,
+.completed-card {
+  padding: 8px 10px;
+}
+
+.task-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 4px 8px;
+  border-radius: var(--radius-md);
+
+  &:hover,
+  &:focus-within {
+    background: var(--surface-2);
+  }
+
+  & + & {
+    border-top: 1px solid var(--border);
+  }
+}
+
+.check {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  cursor: pointer;
+
+  input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .check-box {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 7px;
+    color: transparent;
+    transition:
+      background var(--duration-fast) var(--ease-out),
+      border-color var(--duration-fast) var(--ease-out);
+  }
+
+  input:checked + .check-box {
+    background: var(--accent-gradient);
+    border-color: transparent;
+    color: #fff;
+  }
+
+  input:focus-visible + .check-box {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.title-btn {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 4px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: text;
+}
+
+.edit-input {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 8px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.priority,
+.due {
+  cursor: pointer;
+  flex: none;
+  transition: filter var(--duration-fast) var(--ease-out);
+
+  &:hover {
+    filter: brightness(0.95);
+  }
+}
+
+.due.is-empty {
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+
+  .task-row:hover &,
+  .task-row:focus-within &,
+  &:focus-visible {
+    opacity: 1;
+  }
+}
+
+.due-editor {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.due-editor .input-sm {
+  width: 150px;
+}
+
+.row-actions {
+  display: inline-flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+
+  .task-row:hover &,
+  .task-row:focus-within & {
+    opacity: 1;
+  }
+
+  .danger:hover {
+    color: var(--danger);
+  }
+}
+
+.completed-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 4px;
+}
+
+.collapse-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font-weight: 600;
+
+  &:hover {
+    background: var(--surface-2);
+  }
+}
+
+.count {
+  color: var(--text-faint);
+  font-weight: 600;
+}
+
+.is-done .done-title {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  cursor: default;
+}
+
+.done-time {
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+@media (max-width: 960px) {
+  .add-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .add-options {
+    justify-content: flex-end;
+  }
+
+  .row-actions,
+  .due.is-empty {
+    opacity: 1;
+  }
+}

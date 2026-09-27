@@ -1,0 +1,201 @@
+<div class="page fade-up">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">{{ greeting }}</h1>
+      <p class="page-subtitle">{{ todayLabel }}</p>
+    </div>
+    <div class="page-actions">
+      <button type="button" class="btn" (click)="focusNewTask()"><app-icon name="check" [size]="18" /> New task</button>
+      <button type="button" class="btn btn-primary" (click)="newNote()"><app-icon name="plus" [size]="18" /> New note</button>
+    </div>
+  </header>
+
+  @if (error(); as message) {
+    <div class="alert" role="alert">
+      <app-icon name="warning" [size]="18" />
+      <span>{{ message }}</span>
+      <button type="button" class="btn btn-ghost btn-sm" (click)="error.set(null)">Dismiss</button>
+    </div>
+  }
+
+  <section class="stat-grid" aria-label="Overview">
+    <a class="stat stat-link" routerLink="/tasks">
+      <span class="stat-label"><app-icon name="tasks" [size]="16" /> Open tasks</span>
+      <span class="stat-value">{{ tasks.openCount() }}</span>
+      <span class="stat-meta">{{ tasks.completed().length }} completed</span>
+    </a>
+    <a class="stat stat-link" routerLink="/tasks">
+      <span class="stat-label"><app-icon name="calendar" [size]="16" /> Due today</span>
+      <span class="stat-value" [class.is-warning]="tasks.overdue().length > 0">{{ tasks.dueToday().length }}</span>
+      <span class="stat-meta">
+        @if (tasks.overdue().length > 0) {
+          {{ tasks.overdue().length }} overdue
+        } @else {
+          Nothing overdue
+        }
+      </span>
+    </a>
+    <a class="stat stat-link" routerLink="/notes">
+      <span class="stat-label"><app-icon name="note" [size]="16" /> Notes</span>
+      <span class="stat-value">{{ notes.count() }}</span>
+      <span class="stat-meta">{{ notes.pinned().length }} pinned</span>
+    </a>
+    <a class="stat stat-link" routerLink="/focus">
+      <span class="stat-label"><app-icon name="timer" [size]="16" /> Focus today</span>
+      <span class="stat-value">{{ focus.stats().todayFocusMinutes }}<span class="stat-unit">min</span></span>
+      <span class="stat-meta">{{ focus.stats().todayFocusSessions }} sessions</span>
+    </a>
+  </section>
+
+  <div class="columns">
+    <div class="column">
+      <section class="card">
+        <div class="card-header">
+          <h2 class="card-title"><app-icon name="tasks" [size]="18" /> Today</h2>
+          <a class="btn btn-ghost btn-sm" routerLink="/tasks">All tasks <app-icon name="chevron-right" [size]="14" /></a>
+        </div>
+
+        <form class="quick-add" (submit)="$event.preventDefault(); addTask()">
+          <label class="visually-hidden" for="dash-new-task">New task</label>
+          <input
+            #newTaskInput
+            id="dash-new-task"
+            class="input"
+            type="text"
+            placeholder="Add a task and press Enter"
+            autocomplete="off"
+            [value]="newTaskTitle()"
+            (input)="newTaskTitle.set($any($event.target).value)"
+          />
+          <button type="submit" class="btn btn-soft btn-icon" [disabled]="!newTaskTitle().trim() || busy()" aria-label="Add task">
+            <app-icon name="plus" [size]="18" />
+          </button>
+        </form>
+
+        @if (todayTasks().length > 0 || upNext().length > 0) {
+          @if (upNext().length > 0) {
+            <p class="list-caption">Nothing due today. Up next:</p>
+          }
+          <ul class="task-list">
+            @for (task of todayTasks().length > 0 ? todayTasks() : upNext(); track task.id) {
+              <li class="task-row" [class.is-overdue]="isOverdue(task)">
+                <label class="check">
+                  <input type="checkbox" [checked]="task.completed" (change)="toggleTask(task)" [attr.aria-label]="'Complete ' + task.title" />
+                  <span class="check-box"><app-icon name="check" [size]="14" /></span>
+                </label>
+                <span class="task-title">{{ task.title }}</span>
+                @if (task.priority > 0) {
+                  <span class="chip" [class.chip-warning]="task.priority === 1" [class.chip-danger]="task.priority === 2">
+                    {{ task.priority === 2 ? 'High' : 'Medium' }}
+                  </span>
+                }
+                @if (task.dueAt) {
+                  <span class="due" [class.chip-danger]="isOverdue(task)">
+                    <app-icon name="calendar" [size]="13" />
+                    {{ isOverdue(task) ? 'Overdue' : 'Today' }}
+                  </span>
+                }
+              </li>
+            }
+          </ul>
+        } @else {
+          <app-empty-state icon="check" title="All clear" description="No open tasks. Add one above to get started." />
+        }
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2 class="card-title"><app-icon name="pin" [size]="18" /> Pinned notes</h2>
+          <a class="btn btn-ghost btn-sm" routerLink="/notes">All notes <app-icon name="chevron-right" [size]="14" /></a>
+        </div>
+        @if (pinnedNotes().length > 0) {
+          <ul class="note-grid">
+            @for (note of pinnedNotes(); track note.id) {
+              <li>
+                <button type="button" class="note-card" (click)="openNote(note.id)" [style.--note-color]="note.color">
+                  <span class="note-title">{{ note.title || 'Untitled note' }}</span>
+                  <span class="note-snippet">{{ note.content || 'No content yet' }}</span>
+                  <span class="note-time">{{ note.updatedAt | relativeTime }}</span>
+                </button>
+              </li>
+            }
+          </ul>
+        } @else {
+          <app-empty-state icon="pin" title="No pinned notes" description="Pin a note to keep it within reach here.">
+            <button type="button" class="btn btn-soft btn-sm" (click)="newNote()">Write a note</button>
+          </app-empty-state>
+        }
+      </section>
+    </div>
+
+    <div class="column">
+      <section class="card focus-card" [class.is-running]="focus.isRunning()">
+        <div class="card-header">
+          <h2 class="card-title"><app-icon name="timer" [size]="18" /> Focus</h2>
+          <span class="chip" [class.chip-accent]="focus.isRunning()" [class.chip-info]="focus.isPaused()">
+            {{ focus.isRunning() ? 'Running' : focus.isPaused() ? 'Paused' : focus.state().status === 'completed' ? 'Ready for ' + focus.phaseLabel().toLowerCase() : 'Idle' }}
+          </span>
+        </div>
+        <div class="focus-time">{{ focus.remainingLabel() }}</div>
+        <div class="focus-phase">{{ focus.phaseLabel() }} &middot; session {{ focus.state().completedFocusSessions + 1 }}</div>
+        <div class="focus-controls">
+          @switch (focus.state().status) {
+            @case ('running') {
+              <button type="button" class="btn" (click)="pauseFocus()" [disabled]="busy()"><app-icon name="pause" [size]="18" /> Pause</button>
+              <button type="button" class="btn btn-ghost" (click)="stopFocus()" [disabled]="busy()"><app-icon name="stop" [size]="18" /> Stop</button>
+            }
+            @case ('paused') {
+              <button type="button" class="btn btn-primary" (click)="resumeFocus()" [disabled]="busy()"><app-icon name="play" [size]="18" /> Resume</button>
+              <button type="button" class="btn btn-ghost" (click)="stopFocus()" [disabled]="busy()"><app-icon name="stop" [size]="18" /> Stop</button>
+            }
+            @default {
+              <button type="button" class="btn btn-primary" (click)="startFocus()" [disabled]="busy()"><app-icon name="play" [size]="18" /> Start</button>
+              <a class="btn btn-ghost" routerLink="/focus">Open timer</a>
+            }
+          }
+        </div>
+      </section>
+
+      <section class="card cat-card">
+        <div class="card-header">
+          <h2 class="card-title"><app-icon name="cat" [size]="18" /> Cat</h2>
+          @if (!catEnabled()) {
+            <span class="chip">Turned off</span>
+          } @else {
+            <span class="chip" [class.chip-success]="catWindow.visible()">{{ catWindow.visible() ? 'On screen' : 'Hidden' }}</span>
+          }
+        </div>
+        @if (catEnabled()) {
+          <p class="cat-look">
+            <span class="chip chip-accent"><app-icon name="palette" [size]="13" /> {{ catLook() }}</span>
+            <a class="cat-customize" routerLink="/settings" fragment="cat-theme">Customize</a>
+          </p>
+        }
+        <p class="muted cat-copy">
+          @if (catEnabled()) {
+            Your cat roams the desktop on its own. Drag it anywhere, right-click it for its menu, or double-click it for quick notes, tasks and the focus timer.
+          } @else {
+            The desktop cat is turned off. Enable it in Settings to bring it back.
+          }
+        </p>
+        <div class="cat-actions">
+          @if (catEnabled()) {
+            @if (catWindow.visible()) {
+              <button type="button" class="btn" (click)="hideCat()" [disabled]="busy()"><app-icon name="eye-off" [size]="18" /> Hide</button>
+            } @else {
+              <button type="button" class="btn btn-primary" (click)="showCat()" [disabled]="busy()"><app-icon name="eye" [size]="18" /> Show</button>
+            }
+            <button type="button" class="btn btn-ghost" (click)="toggleWalking()" [disabled]="busy()">
+              <app-icon [name]="catWalking() ? 'pause' : 'play'" [size]="18" /> {{ catWalking() ? 'Pause walking' : 'Resume walking' }}
+            </button>
+          } @else {
+            <a class="btn btn-primary" routerLink="/settings" fragment="cat">Open settings</a>
+          }
+        </div>
+        @if (catHotkey(); as hotkey) {
+          <p class="cat-hint">Show or hide it anytime with <kbd class="kbd">{{ hotkey }}</kbd></p>
+        }
+      </section>
+    </div>
+  </div>
+</div>

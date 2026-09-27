@@ -1,0 +1,40 @@
+@if (error(); as message) {
+  <p class="error" role="alert">{{ message }}</p>
+}
+
+@if (empty()) {
+  <div class="empty">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0" /></svg>
+    <p>Nothing due</p>
+    @if (tasks.loading()) {
+      <span class="sub">Checking...</span>
+    } @else {
+      <span class="sub">Tasks with a due date show up here.</span>
+    }
+  </div>
+} @else {
+  @if (overdue().length > 0) {
+    <h3 class="group late">Overdue</h3>
+    <ul class="list">
+      @for (task of overdue(); track task.id) {
+        <li class="row">
+          <button type="button" class="done" [attr.aria-label]="'Complete ' + task.title" (click)="complete(task)"></button>
+          <span class="text">{{ task.title }}</span>
+          <span class="when late">{{ task.dueAt | date: 'MMM d' }}</span>
+        </li>
+      }
+    </ul>
+  }
+  @if (dueToday().length > 0) {
+    <h3 class="group">Due today</h3>
+    <ul class="list">
+      @for (task of dueToday(); track task.id) {
+        <li class="row">
+          <button type="button" class="done" [attr.aria-label]="'Complete ' + task.title" (click)="complete(task)"></button>
+          <span class="text">{{ task.title }}</span>
+          <span class="when">{{ task.dueAt | date: 'HH:mm' }}</span>
+        </li>
+      }
+    </ul>
+  }
+}

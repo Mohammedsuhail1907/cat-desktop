@@ -1,0 +1,103 @@
+<header class="head">
+  <h2 class="title"><app-icon name="cat" [size]="18" /> Cat Companion</h2>
+  @if (!cat().enabled) {
+    <span class="chip">Turned off</span>
+  } @else {
+    <span class="chip" [class.chip-success]="catWindow.visible()">{{ catWindow.visible() ? 'On screen' : 'Hidden' }}</span>
+  }
+</header>
+
+<div class="row row-highlight">
+  <div class="row-text">
+    <span class="row-label">Enable cat</span>
+    <span class="row-hint">A small cat that lives on your desktop: it walks, naps and keeps quick notes, tasks and the timer at hand.</span>
+  </div>
+  <app-toggle ariaLabel="Enable cat" [checked]="cat().enabled" (checkedChange)="setFlag('enabled', $event)" />
+</div>
+
+<div class="look">
+  <app-cat-preview [scale]="cat().scale" [theme]="cat().theme" [opacity]="cat().opacity" />
+
+  <div class="look-controls">
+    <div class="field size-field" id="cat-size">
+      <label class="field-label" for="cat-size-range">
+        Size: <span class="value">{{ scalePercent() }} %</span>
+        <span class="muted-value">{{ boxLabel() }}</span>
+      </label>
+      <input
+        id="cat-size-range"
+        class="range"
+        type="range"
+        [min]="minPercent"
+        [max]="maxPercent"
+        step="5"
+        list="cat-size-marks"
+        [value]="scalePercent()"
+        [attr.aria-valuetext]="scalePercent() + ' percent'"
+        (input)="setScalePercent($any($event.target).value)"
+      />
+      <datalist id="cat-size-marks"><option value="100"></option></datalist>
+      <div class="range-ends" aria-hidden="true"><span>Small</span><span>Large</span></div>
+    </div>
+
+    <div class="field" id="cat-theme">
+      <span class="field-label" id="cat-theme-label">Theme: <span class="value">{{ themeName() }}</span></span>
+      <app-cat-theme-picker label="Cat theme" [value]="cat().theme" (valueChange)="setTheme($event)" />
+    </div>
+  </div>
+</div>
+
+<div class="flags">
+  @for (flag of flags; track flag.key) {
+    <div class="row">
+      <div class="row-text">
+        <span class="row-label">{{ flag.label }}</span>
+        <span class="row-hint">
+          {{ flag.hint }}
+          @if (flag.key === 'randomBehaviour' && randomMixed()) {
+            <em>Partly on (see Advanced).</em>
+          }
+        </span>
+      </div>
+      <app-toggle [ariaLabel]="flag.label" [checked]="isOn(flag.key)" (checkedChange)="setFlag(flag.key, $event)" />
+    </div>
+  }
+</div>
+
+<details class="advanced">
+  <summary><app-icon name="chevron-right" [size]="14" /> Advanced behaviour</summary>
+  <div class="flags">
+    @for (flag of advancedFlags; track flag.key) {
+      <div class="row">
+        <div class="row-text">
+          <span class="row-label">{{ flag.label }}</span>
+          <span class="row-hint">{{ flag.hint }}</span>
+        </div>
+        <app-toggle [ariaLabel]="flag.label" [checked]="isOn(flag.key)" (checkedChange)="setFlag(flag.key, $event)" />
+      </div>
+    }
+  </div>
+</details>
+
+<div class="sliders">
+  <label class="field">
+    <span class="field-label">Walking speed <span class="value">{{ cat().walkingSpeed.toFixed(1) }}&times;</span></span>
+    <input class="range" type="range" min="0.5" max="2" step="0.1" [value]="cat().walkingSpeed" (input)="setSpeed($any($event.target).value)" />
+  </label>
+  <label class="field">
+    <span class="field-label">Opacity <span class="value">{{ (cat().opacity * 100).toFixed(0) }} %</span></span>
+    <input class="range" type="range" min="0.3" max="1" step="0.05" [value]="cat().opacity" (input)="setOpacity($any($event.target).value)" />
+  </label>
+</div>
+
+<div class="actions">
+  @if (catWindow.visible()) {
+    <button type="button" class="btn" (click)="hideCat()" [disabled]="busy() || !cat().enabled"><app-icon name="eye-off" [size]="16" /> Hide cat</button>
+  } @else {
+    <button type="button" class="btn btn-primary" (click)="showCat()" [disabled]="busy() || !cat().enabled"><app-icon name="eye" [size]="16" /> Show cat</button>
+  }
+  <button type="button" class="btn" (click)="toggleWalking()" [disabled]="busy() || !cat().enabled">
+    <app-icon [name]="cat().autoWalk ? 'pause' : 'play'" [size]="16" /> {{ cat().autoWalk ? 'Pause walking' : 'Resume walking' }}
+  </button>
+  <button type="button" class="btn" (click)="bringCatHere()" [disabled]="busy() || !cat().enabled"><app-icon name="monitor" [size]="16" /> Bring cat to this screen</button>
+</div>
